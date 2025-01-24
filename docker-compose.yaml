@@ -1,0 +1,75 @@
+version: '3.7'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: captain
+      POSTGRES_PASSWORD: squawkvfr
+      POSTGRES_DB: rocketjunior
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7.4.0-alpine
+    restart: always
+    ports:
+      - 6379:6379
+  api: &api_base
+    build: 
+      context: ./
+      dockerfile: ./Dockerfile
+    restart: always
+    working_dir: /app
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      DATABASE_URL: postgresql://captain:squawkvfr@db:5432/rocketjunior
+      PYTHONPATH: /app
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/app
+    depends_on:
+      - db
+  migrations: 
+    <<: *api_base
+    restart: 'no'
+    command: python manage.py migrate
+    ports: []
+#   celery:
+#     <<: *api_base
+#     restart: always
+#     command: celery -A aircraft_api worker --loglevel=info
+#     environment:
+#       - DJANGO_SETTINGS_MODULE=aircraft_api.settings
+#     ports: []
+#     depends_on:
+#       - db
+#       - api
+#   celery_beat:
+#     <<: *api_base
+#     restart: always
+#     command: celery -A aircraft_api beat --loglevel=info
+#     environment:
+#       - DJANGO_SETTINGS_MODULE=aircraft_api.settings
+#     ports: []
+#   debug:
+#     <<: *api_base
+#     restart: always
+#     ports: []
+#     command: tail -f /dev/null
+#   node:
+#     build:
+#       context: ./vue-app
+#       dockerfile: Dockerfile
+#     restart: always
+#     ports:
+#       - 8080:8080
+#     command: >
+#       sh -c "http-server dist"
+#     depends_on:
+#       - db
+#       - api
+volumes:
+  pgdata:
