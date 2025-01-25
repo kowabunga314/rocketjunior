@@ -2,6 +2,8 @@ from decouple import config
 from django.db import models, transaction
 from rest_framework.exceptions import ValidationError
 
+from entity.managers import EntityManager
+
 
 class Entity(models.Model):
     name = models.CharField(max_length=256, null=False, blank=False)
@@ -9,6 +11,25 @@ class Entity(models.Model):
     path = models.CharField(max_length=2048, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = EntityManager()
+
+    def save(self, *args, **kwargs):
+        # Handle entity path
+        try:
+            old_path = self.path
+            self.path = self._generate_path()
+            # Update child paths
+            Entity.objects.update_child_paths(old_path, self.path)
+        except ValueError:
+            # Path update will be handled in post-save signal
+            pass
+        except ValidationError:
+            # Path update will be handled in post-save signal
+            raise
+
+        # Save the object
+        super().save(*args, **kwargs)
 
     def subtree(self):
         data = self._repr(root=True)
@@ -33,9 +54,10 @@ class Entity(models.Model):
     
     def _repr(self, root=False):
         data = {}
+        data['id'] = self.id
         data['name'] = self.name
+        data['path'] = self.path
         if root:
-            data['path'] = self.path
             data['parent'] = self.parent.name if self.parent is not None else None
         data['properties'] = self._get_attributes()
         data['descendants'] = [x._repr() for x in self.descendants.all()]
@@ -43,10 +65,7 @@ class Entity(models.Model):
         return data
 
     def _get_attributes(self):
-        return [a.as_dict() for a in self.attributes.all()]
-
-
-
+        return {a.key: a.get_value() for a in self.attributes.all()}
 
 
 # TODO: Consider making type-specific attributes like IntegerAttribute, DecimalAttribute, or BooleanAttribute

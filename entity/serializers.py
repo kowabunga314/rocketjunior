@@ -13,6 +13,16 @@ class EntitySerializer(serializers.ModelSerializer):
         if '/' in value:
             raise ValidationError('Entity names cannot contain \'/\' (forward slash).')
         return value
+    
+    def update(self, instance, validated_data):
+        # Update the instance with the validated data
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Save the instance explicitly to trigger the post_save signal
+        instance.save()
+
+        return instance
 
 
 class AttributeSerializer(serializers.ModelSerializer):

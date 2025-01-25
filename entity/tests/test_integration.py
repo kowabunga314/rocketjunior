@@ -1,115 +1,99 @@
-from rest_framework.test import APITestCase
+from django.urls import reverse
 from rest_framework import status
-from entity.models import Attribute, Entity
+from rest_framework.test import APITestCase
+from entity.models import Entity
 
-class EntityAPITestCase(APITestCase):
+class EntityViewSetTestCase(APITestCase):
     def setUp(self):
-        """Set up initial data for the test"""
-        self.entity_data = {
-            'name': 'Test Entity',
-            'description': 'This is a test entity'
-        }
-        self.entity = Entity.objects.create(**self.entity_data)
-        self.url = '/api/entities/'
+        # Create test entities
+        self.rocket = Entity.objects.create(name="Rocket")
+        self.stage1 = Entity.objects.create(name="Stage1", parent=self.rocket)
+        self.stage1engine1 = Entity.objects.create(name="Engine1", parent=self.stage1)
+        self.stage1engine2 = Entity.objects.create(name="Engine2", parent=self.stage1)
+        self.stage2 = Entity.objects.create(name="Stage2", parent=self.rocket)
+        self.stage2engine1 = Entity.objects.create(name="Engine1", parent=self.stage2)
 
-    def test_get_entities(self):
-        """Test that we can get the list of entities"""
-        response = self.client.get(self.url)
+        # Set pathing expectations
+        self.rocket_path = f'/{self.rocket.id}/'
+        self.stage1_path = f'/{self.rocket.id}/{self.stage1.id}/'
+        self.stage1engine1_path = f'/{self.rocket.id}/{self.stage1.id}/{self.stage1engine1.id}/'
+        self.stage1engine2_path = f'/{self.rocket.id}/{self.stage1.id}/{self.stage1engine2.id}/'
+
+        # Set up URLs
+        self.list_url = reverse('entity-list')  # URL for the list view
+        self.detail_url = reverse('entity-detail', args=[self.rocket.id])  # URL for the detail view
+        self.subtree_url = reverse('entity-subtree', args=[self.rocket.id])  # URL for the subtree action
+
+        # Set up user and authentication
+        self.user = self._create_user()
+        self.client.force_authenticate(user=self.user)
+
+    def _create_user(self):
+        from django.contrib.auth.models import User
+        return User.objects.create_user(username="testuser", password="password")
+
+    def test_entity_list(self):
+        """Test that the list endpoint returns all entities."""
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertGreater(len(response.data), 0)  # Check if there are any entities in the response
+        self.assertEqual(len(response.data), Entity.objects.count())
 
-    def test_post_entity(self):
-        """Test creating a new entity"""
-        new_entity_data = {
-            'name': 'New Entity',
-            'description': 'A newly created entity'
+    def test_entity_detail(self):
+        """Test that the detail endpoint returns the correct entity."""
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], self.rocket.name)
+
+    def test_entity_subtree(self):
+        """Test that the subtree action returns the correct hierarchy."""
+        response = self.client.get(self.subtree_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the structure of the subtree
+        expected_subtree = self.rocket.subtree()
+        self.assertEqual(response.data, expected_subtree)
+
+    def test_entity_subtree_paths(self):
+        """Test that the subtree action returns the correct hierarchy."""
+        response = self.client.get(self.subtree_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Verify the root node path
+        self.assertEqual(response.data.get('path'), self.rocket_path)
+
+        s1e1_subtree_url = reverse('entity-subtree', args=[self.stage1engine1.id])
+        response = self.client.get(s1e1_subtree_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Verify the child node path
+        self.assertEqual(response.data.get('path'), self.stage1engine1_path)
+
+    def test_create_entity(self):
+        """Test that we can create a new entity."""
+        data = {
+            "name": "Kickstage",
+            "parent": self.rocket.id
         }
-        response = self.client.post(self.url, new_entity_data, format='json')
+        response = self.client.post(self.list_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['name'], new_entity_data['name'])
-        self.assertEqual(response.data['description'], new_entity_data['description'])
+        self.assertEqual(Entity.objects.filter(name="Kickstage").count(), 1)
 
-    def test_get_single_entity(self):
-        """Test retrieving a single entity"""
-        response = self.client.get(f'{self.url}{self.entity.id}/')
+    def test_update_entity(self):
+        """Test that we can update an entity."""
+        data = {
+            "name": "Rocket2"
+        }
+        response = self.client.patch(self.detail_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['name'], self.entity.name)
-        self.assertEqual(response.data['description'], self.entity.description)
+        self.rocket.refresh_from_db()
+        self.assertEqual(self.rocket.name, "Rocket2")
 
     def test_delete_entity(self):
-        """Test deleting an entity"""
-        response = self.client.delete(f'{self.url}{self.entity.id}/')
+        """Test that we can delete an entity."""
+        response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        # Verify it no longer exists
-        response = self.client.get(f'{self.url}{self.entity.id}/')
+        self.assertFalse(Entity.objects.filter(id=self.rocket.id).exists())
+
+    def test_subtree_invalid_entity(self):
+        """Test that the subtree action returns 404 for a nonexistent entity."""
+        invalid_url = reverse('entity-subtree', args=[999])  # ID 999 does not exist
+        response = self.client.get(invalid_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def _create_entities(self):
-        self.rocket = Entity.objects.create(
-            name="Rocket",
-            parent=None
-        )
-        self._create_root_attributes(self.root)
-        self._create_first_stage(self.rocket)
-        self._create_second_stage(self.rocket)
-
-    def _create_root_attributes(self, entity):
-        height = Attribute.objects.create(
-            entity=entity,
-            key='Height',
-            value='18.000',
-            data_type=Attribute.DataTypeChoices.FLT
-        )
-        weight = Attribute.objects.create(
-            entity=entity,
-            key='Weight',
-            value='12000.000',
-            data_type=Attribute.DataTypeChoices.FLT
-        )
-
-    def _create_first_stage(self, root):
-        first_stage = Entity.objects.create(
-            parent=root,
-            name='Stage1'
-        )
-        first_stage.save()
-        
-        thrust = ['9.493', '9.413', '9.899']
-        isp = ['12.156', '11.632', '12.551']
-        for i in range(3):
-            engine = Entity.objects.create(
-                parent=first_stage,
-                name=f'Engine{i}'
-            )
-            engine_thrust = Attribute.objects.create(
-                entity=engine,
-                key='Thrust',
-                value=thrust[i]
-            )
-            engine_isp = Attribute.objects.create(
-                entity=engine,
-                key='ISP',
-                value=isp[i]
-            )
-    
-    def _create_second_stage(self, root):
-        second_stage = Entity.objects.create(
-            parent=root,
-            name='Stage1'
-        )
-        second_stage.save()
-        
-        engine = Entity.objects.create(
-            parent=second_stage,
-            name=f'Engine1'
-        )
-        engine_thrust = Attribute.objects.create(
-            entity=engine,
-            key='Thrust',
-            value='1.622'
-        )
-        engine_isp = Attribute.objects.create(
-            entity=engine,
-            key='ISP',
-            value='15.110'
-        )
