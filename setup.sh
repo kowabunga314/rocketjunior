@@ -17,7 +17,7 @@ echo "Setting up environment..."
 if [ ! -f .env ]; then
   echo "Creating .env file from .env.example..."
   cp .env.example .env
-  echo "Please edit the .env file with your secrets."
+  echo -e "\033[31mIMPORTANT: Please edit the .env file with your secrets.\033[0m"
 fi
 
 echo "Allowing direnv..."
