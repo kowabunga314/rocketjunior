@@ -63,21 +63,17 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
             return Response({'message': 'Entity not found.'})
 
     def create(self, request, *args, **kwargs):
+        # Set up context fields from path kwarg
         full_path = '/' + kwargs.get('path')
         path_parts = full_path.strip('/').split('/')
         entity_name = path_parts[-1]
         parent_path = '/' + '/'.join(path_parts[:-1]) if len(path_parts) > 1 else None
 
-        parent_entity = None
-        if parent_path:
-            print('\nparent_path: ', parent_path)
-            parent_entity = Entity.objects.get(path=parent_path)
+        # Get parent entity if exists
+        parent_entity = Entity.objects.get_or_none(path=parent_path)
 
+        # Pass request data to serializer
         serializer_data = request.data
-        # print('request.data: ', request.data)
-        # serializer_data['entity_name'] = entity_name
-        # serializer_data['parent_path'] = parent_path
-
         serializer = GenericEASerializer(
             data=serializer_data,
             context={
@@ -86,6 +82,7 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
                 'parent_entity': parent_entity
             }
         )
+        # Validate request data and return response
         if serializer.is_valid():
             body = serializer.save()
             return Response(body, status=status.HTTP_201_CREATED)
