@@ -1,7 +1,9 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from entity.models import Entity
+from unittest import skip
+
+from entity.models import Attribute, Entity
 
 class EntityViewSetTestCase(APITestCase):
     def setUp(self):
@@ -97,3 +99,180 @@ class EntityViewSetTestCase(APITestCase):
         invalid_url = reverse('entity-subtree', args=[999])  # ID 999 does not exist
         response = self.client.get(invalid_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class AttributeViewSetTestCase(APITestCase):
+    def setUp(self):
+        # Create test entities
+        self.rocket = Entity.objects.create(name="Rocket")
+        self.stage1 = Entity.objects.create(name="Stage1", parent=self.rocket)
+        self.stage1engine1 = Entity.objects.create(name="Engine1", parent=self.stage1)
+        self.stage1engine2 = Entity.objects.create(name="Engine2", parent=self.stage1)
+        self.stage2 = Entity.objects.create(name="Stage2", parent=self.rocket)
+        self.stage2engine1 = Entity.objects.create(name="Engine1", parent=self.stage2)
+
+        # Create test attributes
+        # Rocket
+        Attribute.objects.create(
+            entity=self.rocket,
+            key='Height',
+            value='18.000',
+            data_type=Attribute.DataTypeChoices.FLT
+        )
+        Attribute.objects.create(
+            entity=self.rocket,
+            key='Mass',
+            value='12000.000',
+            data_type=Attribute.DataTypeChoices.FLT
+        )
+        # Stage1-Engine1
+        self.s1e1_thrust = Attribute.objects.create(
+            entity=self.stage1engine1,
+            key='Thrust',
+            value='9.493',
+            data_type=Attribute.DataTypeChoices.FLT
+        )
+        self.s1e1_isp = Attribute.objects.create(
+            entity=self.stage1engine1,
+            key='ISP',
+            value='12.156',
+            data_type=Attribute.DataTypeChoices.FLT
+        )
+        # Stage1-Engine2
+        Attribute.objects.create(
+            entity=self.stage1engine2,
+            key='Thrust',
+            value='9.413',
+            data_type=Attribute.DataTypeChoices.FLT
+        )
+        Attribute.objects.create(
+            entity=self.stage1engine2,
+            key='ISP',
+            value='11.632',
+            data_type=Attribute.DataTypeChoices.FLT
+        )
+        # Stage2-Engine1
+        Attribute.objects.create(
+            entity=self.stage2engine1,
+            key='Thrust',
+            value='1.622',
+            data_type=Attribute.DataTypeChoices.FLT
+        )
+        Attribute.objects.create(
+            entity=self.stage2engine1,
+            key='ISP',
+            value='15.110',
+            data_type=Attribute.DataTypeChoices.FLT
+        )
+
+        # Set up URLs
+        self.subtree_url = reverse('entity-subtree', args=[self.stage1engine1.id])  # URL for the subtree action
+
+        # Set up user and authentication
+        self.user = self._create_user()
+        self.client.force_authenticate(user=self.user)
+
+    def _create_user(self):
+        from django.contrib.auth.models import User
+        return User.objects.create_user(username="testuser", password="password")
+    
+    @skip
+    def test_get_entity_with_attributes(self):
+        """Test that the detail endpoint returns the correct entity attributes."""
+        detail_url = reverse('entity-detail', args=[self.stage1engine1.id]) 
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('name'), self.stage1engine1.name)
+        thrust_value = self.stage1engine1.attributes.filter(key='Thrust').first().get_value()
+        isp_value = self.stage1engine1.attributes.filter(key='ISP').first().get_value()
+
+        self.stage1engine1.refresh_from_db()
+        self.assertEqual(properties.get('Thrust'), thrust_value)
+        self.assertEqual(properties.get('ISP'), isp_value)
+
+    def test_add_attribute_to_entity(self):
+        """Test that we can add a new attribute to an entity."""
+        data = {
+            "entity": self.stage1engine1.id,
+            "key": "Notes",
+            "value": "Has fuel leak"
+        }
+        attribute_url = reverse('attribute-list')
+        response = self.client.post(attribute_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Attribute.objects.filter(
+            entity=self.stage1engine1,
+            key="Notes"
+        ).count(), 1)
+
+        # Check properties on subtree request
+        response = self.client.get(self.subtree_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the structure of the subtree
+        self.stage1engine1.refresh_from_db()
+        properties = response.data.get('properties')
+        self.assertIsNotNone(properties)
+        response_notes = properties.get('Notes')
+        self.assertIsNotNone(response_notes)
+        s1e1_notes = self.stage1engine1.attributes.filter(key="Notes").first().get_value()
+        self.assertEqual(response_notes, s1e1_notes)
+
+    def test_edit_attribute(self):
+        """Test that we can alter an existing attribute on an entity."""
+        data = {
+            "entity": self.stage1engine1.id,
+            "key": "ISP",
+            "value": "300",
+            "data_type": Attribute.DataTypeChoices.INT
+        }
+        attribute_url = reverse('attribute-detail', args=[self.s1e1_isp.id])
+        response = self.client.put(attribute_url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Attribute.objects.filter(
+            entity=self.stage1engine1,
+            key="ISP"
+        ).count(), 1)
+
+        # Check properties on subtree request
+        response = self.client.get(self.subtree_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the structure of the subtree
+        self.stage1engine1.refresh_from_db()
+        properties = response.data.get('properties')
+        self.assertIsNotNone(properties)
+        response_isp = properties.get('ISP')
+        self.assertIsNotNone(response_isp)
+        s1e1_isp = self.stage1engine1.attributes.filter(key="ISP").first().get_value()
+        self.assertEqual(response_isp, s1e1_isp)
+
+    def test_delete_attribute(self):
+        """Test that we can delete an existing attribute on an entity."""
+        attribute_url = reverse('attribute-detail', args=[self.s1e1_isp.id])
+        response = self.client.delete(attribute_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Attribute.objects.filter(
+            entity=self.stage1engine1.id,
+            key="ISP"
+        ).count(), 0)
+
+        # Check that object is removed from database
+        s1e1_isp_queryset = Attribute.objects.filter(
+            entity=self.stage1engine1,
+            key='ISP'
+        )
+        self.assertEqual(s1e1_isp_queryset.count(), 0)
+
+        # Check properties on subtree request
+        response = self.client.get(self.subtree_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the structure of the subtree
+        self.stage1engine1.refresh_from_db()
+        properties = response.data.get('properties')
+        self.assertIsNotNone(properties)
+        response_isp = properties.get('ISP')
+        self.assertIsNone(response_isp)
+        s1e1_isp_count = self.stage1engine1.attributes.filter(key="ISP").count()
+        self.assertEqual(s1e1_isp_count, 0)
