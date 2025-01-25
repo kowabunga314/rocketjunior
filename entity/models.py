@@ -9,24 +9,32 @@ class Entity(models.Model):
     name = models.CharField(max_length=256, null=False, blank=False)
     parent = models.ForeignKey(to='self', null=True, blank=True, on_delete=models.SET_NULL, related_name='descendants')
     path = models.CharField(max_length=2048, null=True, blank=True)
+    tree_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = EntityManager()
 
+    # class Meta:
+    #     unique_together = ('path', 'parent')
+
     def save(self, *args, **kwargs):
         # Handle entity path
-        try:
-            old_path = self.path
-            self.path = self._generate_path()
-            # Update child paths
-            Entity.objects.update_child_paths(old_path, self.path)
-        except ValueError:
-            # Path update will be handled in post-save signal
-            pass
-        except ValidationError:
-            # Path update will be handled in post-save signal
-            raise
+        old_path = self.path
+        self.path = self._generate_name_path()
+        # Check for duplicate paths
+        extant = Entity.objects.path_exists(self.path)
+        if extant:
+            if len(extant) > 1 or (self.id is not None and self.id not in extant):
+                raise ValidationError({
+                    'ValidationError': {
+                        'message': f'Entity path is not unique: {self.path}',
+                        'hint': 'If this is a root node, its name must be unique among root nodes. If this is a '\
+                            'descendant node, its name must be unique among its siblings'
+                    }
+                })
+        # Update child paths
+        Entity.objects.update_child_paths(old_path, self.path)
 
         # Save the object
         super().save(*args, **kwargs)
@@ -34,25 +42,13 @@ class Entity(models.Model):
     def subtree(self):
         data = self._repr(root=True)
         return data
-
-    def _generate_path(self):
-        # Base case
-        if self.parent == None:
-            return f'/{self.id}/'
-        # Prevent cyclic references
-        if f'/{self.id}/' in self.parent.path:
-            raise ValidationError('A node cannot be a descendant of itself.')
-        
-        return f'{self.parent.path}{self.id}/'
     
-    # TODO: integrate this with save method to replace manager
-    def update_child_paths(self, old_path):
-        descendants = self.descendants.all()
-        for d in descendants:
-            d.path = d.path.replace(old_path, self.path)
-        with transaction.atomic():
-            # Perform bulk update
-            Entity.objects.bulk_update(descendants, ['path'])
+    def _generate_name_path(self):
+        # Base case
+        if self.parent is None:
+            return f'/{self.name}'
+        # Return parent path with self.name appended
+        return f'{self.parent.path}/{self.name}'
     
     def _repr(self, root=False):
         data = {}
@@ -65,6 +61,9 @@ class Entity(models.Model):
         data['descendants'] = [x._repr() for x in self.descendants.all()]
 
         return data
+    
+    def __str__(self):
+        return f'{self.name}: {self.path}'
 
     def _get_attributes(self):
         return {a.key: a.get_value() for a in self.attributes.all()}
@@ -94,3 +93,6 @@ class Attribute(models.Model):
     
     def as_dict(self):
         return {self.key: self.get_value()}
+    
+    def __str__(self):
+        return f'({self.key}: {self.value})'

@@ -39,3 +39,6 @@ class EntityManager(models.Manager):
                         """,
                         [new_path, child_id],
                     )
+    
+    def path_exists(self, path):
+        return [d.id for d in self.filter(path=path)]

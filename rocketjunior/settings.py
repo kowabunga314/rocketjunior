@@ -111,7 +111,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'INFO',  # Set the logging level to DEBUG, INFO, or whatever you need
+            'level': 'DEBUG',  # Set the logging level to DEBUG, INFO, or whatever you need
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',  # Direct the logs to stdout
         },
@@ -119,7 +119,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',  # Set the level to DEBUG to capture all logs
+            'level': 'DEBUG',  # Set the level to DEBUG to capture all logs
             'propagate': True,
         },
     },
