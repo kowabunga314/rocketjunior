@@ -15,8 +15,14 @@ class Entity(models.Model):
 
     objects = EntityManager()
 
-    # class Meta:
-    #     unique_together = ('path', 'parent')
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['parent', 'path'],
+                condition=models.Q(parent__isnull=False, path__isnull=False),
+                name='unique_parent_path'
+            )
+        ]
 
     def save(self, *args, **kwargs):
         # Handle entity path
@@ -25,7 +31,7 @@ class Entity(models.Model):
         # Check for duplicate paths
         extant = Entity.objects.path_exists(self.path)
         if extant:
-            if len(extant) > 1 or (self.id is not None and self.id not in extant):
+            if len(extant) > 1 or self.id is None or (self.id is not None and self.id not in extant):
                 raise ValidationError({
                     'ValidationError': {
                         'message': f'Entity path is not unique: {self.path}',

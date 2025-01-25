@@ -39,6 +39,25 @@ class EntityManager(models.Manager):
                         """,
                         [new_path, child_id],
                     )
+        
+    def update_child_trees(self, path, tree_id):
+        if not path or not tree_id:
+            raise ValueError('path and tree_id required.')
+        
+        with transaction.atomic():
+            descendant_entities = self.select_for_update().filter(
+                path__startswith=path
+            ).exclude(path=path)
+
+            # Prepare descendant for bulk update
+            for descendant in descendant_entities:
+                # Compute the new path
+                descendant.tree_id = tree_id
+
+            # Perform the bulk update
+            self.bulk_update(descendant_entities, ['tree_id'])
+
+
     
     def path_exists(self, path):
         return [d.id for d in self.filter(path=path)]
