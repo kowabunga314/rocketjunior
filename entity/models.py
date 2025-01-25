@@ -45,12 +45,14 @@ class Entity(models.Model):
         
         return f'{self.parent.path}{self.id}/'
     
-    def update_path(self):
+    # TODO: integrate this with save method to replace manager
+    def update_child_paths(self, old_path):
+        descendants = self.descendants.all()
+        for d in descendants:
+            d.path = d.path.replace(old_path, self.path)
         with transaction.atomic():
-            # Call self.save to generate path automatically
-            self.save()
-            for child in self.descendants.all():
-                child.update_path()
+            # Perform bulk update
+            Entity.objects.bulk_update(descendants, ['path'])
     
     def _repr(self, root=False):
         data = {}

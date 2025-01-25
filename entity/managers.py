@@ -1,4 +1,4 @@
-from django.db import models, connection
+from django.db import models, connection, transaction
 
 class EntityManager(models.Manager):
     def update_child_paths(self, old_path, parent_path):

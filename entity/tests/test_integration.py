@@ -36,7 +36,7 @@ class EntityViewSetTestCase(APITestCase):
         """Test that the list endpoint returns all entities."""
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), Entity.objects.count())
+        self.assertEqual(len(response.data.get('results')), Entity.objects.count())
 
     def test_entity_detail(self):
         """Test that the detail endpoint returns the correct entity."""
