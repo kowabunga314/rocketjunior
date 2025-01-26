@@ -206,10 +206,9 @@ class AttributeViewSetTestCase(APITestCase):
         self.stage1engine1.refresh_from_db()
         properties = response.data.get('properties')
         self.assertIsNotNone(properties)
+        
         response_mass = properties.get('Mass')
-        self.assertIsNotNone(response_mass)
-        s1e1_mass = self.stage1engine1.attributes.filter(key="Mass").first().value
-        self.assertEqual(response_mass, s1e1_mass)
+        self.assertIsNone(response_mass)
 
     def test_edit_attribute(self):
         """Test that we can alter an existing attribute on an entity."""

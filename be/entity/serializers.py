@@ -43,7 +43,7 @@ class RoundingDecimalField(serializers.DecimalField):
 
 
 class AttributeSerializer(serializers.ModelSerializer):
-    value = RoundingDecimalField(max_digits=20, decimal_places=3, coerce_to_string=True)
+    value = serializers.DecimalField(max_digits=20, decimal_places=3, coerce_to_string=True)
     # value = serializers.CharField(max_length=31)
     
     class Meta:

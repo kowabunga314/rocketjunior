@@ -84,16 +84,17 @@ class EntityManager(models.Manager):
     def build_tree(self, root_path):
         rows = self.fetch_descendants(root_path)
 
-        # Step 1: Organize entities and attributes
+        # Prepare entity and attribute receptacles
         entities = {}
         attributes = defaultdict(lambda: defaultdict(Decimal))  # Use Decimal for precision
 
         for row in rows:
+            # Break up row into fields
             entity_id, name, path, parent_id, attr_key, attr_value = row
-
             # Ensure each entity is in the dictionary
             if entity_id not in entities:
-                entities[entity_id] = {
+                # Save entity using path as key
+                entities[path] = {
                     "id": entity_id,
                     "name": name,
                     "path": path,
@@ -105,22 +106,22 @@ class EntityManager(models.Manager):
             if attr_key:
                 attributes[entity_id][attr_key] = Decimal(attr_value) if attr_value else None
 
-        # Step 2: Merge attributes into entities
+        # Merge attributes into entities
         for entity_id, props in attributes.items():
             if entity_id in entities:
                 entities[entity_id]["properties"] = props
 
-        # Step 3: Construct the tree structure
+        # Construct the subtree
         tree = {}
-        e = [e for e in entities.values() if e.get('path') == '/Node.1.0']
         for entity in entities.values():
-            if entity["path"] == root_path:  # Root node
+            if entity["path"] == root_path: 
+                # Handle root node
                 tree = entity
-            else:  # Add to parent's descendants
+            else:
+                # Add to parent's descendants
                 parent_path = "/".join(entity["path"].split("/")[:-1])
-                parent = next(
-                    (e for e in entities.values() if e["path"] == parent_path), None
-                )
+                # Look up parent by path
+                parent = entities.get(parent_path)
                 if parent:
                     parent["descendants"].append(entity)
 
