@@ -298,11 +298,11 @@ ALTER TABLE public.django_session OWNER TO captain;
 CREATE TABLE public.entity_attribute (
     id bigint NOT NULL,
     key character varying(256),
-    value character varying(256),
-    data_type character varying(3) NOT NULL,
+    value numeric(20,10),
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    entity_id bigint NOT NULL
+    entity_id bigint NOT NULL,
+    str_value character varying(31) NOT NULL
 );
 
 
@@ -489,6 +489,14 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 24	entity	0007_entity_tree_id	2025-01-25 23:56:49.397132+00
 25	entity	0008_entity_unique_parent_path	2025-01-25 23:56:49.402637+00
 26	sessions	0001_initial	2025-01-25 23:56:49.411368+00
+27	entity	0009_remove_attribute_data_type_alter_attribute_value	2025-01-26 20:24:48.2225+00
+28	entity	0010_alter_attribute_options_alter_entity_options	2025-01-26 20:24:48.225942+00
+29	entity	0011_alter_entity_name_alter_entity_path	2025-01-26 20:24:48.234078+00
+30	entity	0012_alter_attribute_value	2025-01-26 20:24:48.238241+00
+31	entity	0013_attribute_unique_entity_key	2025-01-26 20:24:48.24163+00
+32	entity	0014_alter_attribute_value	2025-01-26 20:24:48.24627+00
+33	entity	0015_alter_attribute_value	2025-01-26 20:24:48.251929+00
+34	entity	0016_attribute_str_value	2025-01-26 20:24:48.254257+00
 \.
 
 
@@ -504,17 +512,17 @@ COPY public.django_session (session_key, session_data, expire_date) FROM stdin;
 -- Data for Name: entity_attribute; Type: TABLE DATA; Schema: public; Owner: captain
 --
 
-COPY public.entity_attribute (id, key, value, data_type, created_at, updated_at, entity_id) FROM stdin;
-1	Height	18.000	str	2025-01-25 23:59:37.194646+00	2025-01-25 23:59:37.194655+00	1
-2	Mass	12000.000	str	2025-01-25 23:59:37.195636+00	2025-01-25 23:59:37.19564+00	1
-3	Thrust	9.493	str	2025-01-26 00:00:31.890757+00	2025-01-26 00:00:31.890764+00	4
-4	ISP	12.156	str	2025-01-26 00:00:31.891313+00	2025-01-26 00:00:31.891317+00	4
-5	Thrust	9.413	str	2025-01-26 00:00:53.553845+00	2025-01-26 00:00:53.553853+00	5
-6	ISP	11.632	str	2025-01-26 00:00:53.554457+00	2025-01-26 00:00:53.554462+00	5
-7	Thrust	9.899	str	2025-01-26 00:01:20.064901+00	2025-01-26 00:01:20.064909+00	6
-8	ISP	12.551	str	2025-01-26 00:01:20.065477+00	2025-01-26 00:01:20.065481+00	6
-9	Thrust	1.622	str	2025-01-26 00:37:03.707765+00	2025-01-26 00:37:03.707774+00	7
-10	ISP	15.110	str	2025-01-26 00:37:03.708414+00	2025-01-26 00:37:03.708418+00	7
+COPY public.entity_attribute (id, key, value, created_at, updated_at, entity_id, str_value) FROM stdin;
+10	ISP	15.1100000000	2025-01-26 00:37:03.708414+00	2025-01-26 00:37:03.708418+00	7	15.110
+1	Height	18.0000000000	2025-01-25 23:59:37.194646+00	2025-01-25 23:59:37.194655+00	1	18.000
+2	Mass	12000.0000000000	2025-01-25 23:59:37.195636+00	2025-01-25 23:59:37.19564+00	1	12000.000
+3	Thrust	9.4930000000	2025-01-26 00:00:31.890757+00	2025-01-26 00:00:31.890764+00	4	9.493
+4	ISP	12.1560000000	2025-01-26 00:00:31.891313+00	2025-01-26 00:00:31.891317+00	4	12.156
+5	Thrust	9.4130000000	2025-01-26 00:00:53.553845+00	2025-01-26 00:00:53.553853+00	5	9.413
+6	ISP	11.6320000000	2025-01-26 00:00:53.554457+00	2025-01-26 00:00:53.554462+00	5	11.632
+7	Thrust	9.8990000000	2025-01-26 00:01:20.064901+00	2025-01-26 00:01:20.064909+00	6	9.899
+8	ISP	12.5510000000	2025-01-26 00:01:20.065477+00	2025-01-26 00:01:20.065481+00	6	12.551
+9	Thrust	1.6220000000	2025-01-26 00:37:03.707765+00	2025-01-26 00:37:03.707774+00	7	1.622
 \.
 
 
@@ -593,7 +601,7 @@ SELECT pg_catalog.setval('public.django_content_type_id_seq', 8, true);
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: captain
 --
 
-SELECT pg_catalog.setval('public.django_migrations_id_seq', 26, true);
+SELECT pg_catalog.setval('public.django_migrations_id_seq', 34, true);
 
 
 --
@@ -861,10 +869,45 @@ CREATE INDEX entity_attribute_entity_id_c2725f67 ON public.entity_attribute USIN
 
 
 --
+-- Name: entity_entity_name_509d691e; Type: INDEX; Schema: public; Owner: captain
+--
+
+CREATE INDEX entity_entity_name_509d691e ON public.entity_entity USING btree (name);
+
+
+--
+-- Name: entity_entity_name_509d691e_like; Type: INDEX; Schema: public; Owner: captain
+--
+
+CREATE INDEX entity_entity_name_509d691e_like ON public.entity_entity USING btree (name varchar_pattern_ops);
+
+
+--
 -- Name: entity_entity_parent_id_5487733c; Type: INDEX; Schema: public; Owner: captain
 --
 
 CREATE INDEX entity_entity_parent_id_5487733c ON public.entity_entity USING btree (parent_id);
+
+
+--
+-- Name: entity_entity_path_7782522e; Type: INDEX; Schema: public; Owner: captain
+--
+
+CREATE INDEX entity_entity_path_7782522e ON public.entity_entity USING btree (path);
+
+
+--
+-- Name: entity_entity_path_7782522e_like; Type: INDEX; Schema: public; Owner: captain
+--
+
+CREATE INDEX entity_entity_path_7782522e_like ON public.entity_entity USING btree (path varchar_pattern_ops);
+
+
+--
+-- Name: unique_entity_key; Type: INDEX; Schema: public; Owner: captain
+--
+
+CREATE UNIQUE INDEX unique_entity_key ON public.entity_attribute USING btree (entity_id, key) WHERE ((entity_id IS NOT NULL) AND (key IS NOT NULL));
 
 
 --
