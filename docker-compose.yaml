@@ -25,7 +25,7 @@ services:
     working_dir: /app
     command: python manage.py runserver 0.0.0.0:8000
     env_file:
-      - ./be/.env
+      - ./be/.envrc
     environment:
       PYTHONPATH: /app
     entrypoint: /app/entrypoint.sh
