@@ -11,7 +11,7 @@ services:
       - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./be/init.sql:/docker-entrypoint-initdb.d/init.sql
   redis:
     image: redis:7.4.0-alpine
     restart: always
@@ -19,20 +19,20 @@ services:
       - 6379:6379
   api: &api_base
     build:
-      context: ./
+      context: ./be
       dockerfile: ./Dockerfile
     restart: always
     working_dir: /app
     command: python manage.py runserver 0.0.0.0:8000
     env_file:
-      - .env
+      - ./be/.env
     environment:
       PYTHONPATH: /app
     entrypoint: /app/entrypoint.sh
     ports:
       - 8000:8000
     volumes:
-      - ./:/app
+      - ./be:/app
     depends_on:
       - db
   migrations:
@@ -40,39 +40,5 @@ services:
     restart: 'no'
     command: python manage.py migrate
     ports: []
-#   celery:
-#     <<: *api_base
-#     restart: always
-#     command: celery -A aircraft_api worker --loglevel=info
-#     environment:
-#       - DJANGO_SETTINGS_MODULE=aircraft_api.settings
-#     ports: []
-#     depends_on:
-#       - db
-#       - api
-#   celery_beat:
-#     <<: *api_base
-#     restart: always
-#     command: celery -A aircraft_api beat --loglevel=info
-#     environment:
-#       - DJANGO_SETTINGS_MODULE=aircraft_api.settings
-#     ports: []
-#   debug:
-#     <<: *api_base
-#     restart: always
-#     ports: []
-#     command: tail -f /dev/null
-#   node:
-#     build:
-#       context: ./vue-app
-#       dockerfile: Dockerfile
-#     restart: always
-#     ports:
-#       - 8080:8080
-#     command: >
-#       sh -c "http-server dist"
-#     depends_on:
-#       - db
-#       - api
 volumes:
   pgdata:

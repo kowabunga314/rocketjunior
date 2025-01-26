@@ -4,7 +4,7 @@
 echo "Checking dependencies..."
 for cmd in docker docker-compose direnv; do
   if ! command -v $cmd &> /dev/null; then
-    echo "$cmd is not installed. Please install it before proceeding."
+    echo -e "\033[31m $cmd is not installed. Please install it before proceeding.\033[0m"
     echo "Examples:"
     echo "  brew install [package]"
     echo "  apt-get install [package]"
@@ -13,21 +13,26 @@ for cmd in docker docker-compose direnv; do
   fi
 done
 
-echo "Setting up environment..."
-if [ ! -f .env ]; then
-  echo "Creating .env file from .env.example..."
-  cp .env.example .env
-  echo -e "\033[31mIMPORTANT: Please edit the .env file with your secrets.\033[0m"
-fi
-
 echo "Allowing direnv..."
+cd be
 direnv allow || { echo "Failed to allow direnv. Ensure direnv is installed and configured."; exit 1; }
+cd ..
 
 echo "Making scripts executable..."
 chmod +x *.sh
 
-echo "Setup complete! You can now start the project with:"
-echo "  docker compose up -d --build"
+echo ""
+echo "===================================================="
+echo ""
+echo "Setup complete!"
+echo "You can now build and start the project with:"
+echo "  make build"
 echo ""
 echo "Execute tests:"
-echo "  docker compose exec api python manage.py test --parallel"
+echo "  make test"
+echo ""
+echo "Stop application:"
+echo "  make stop"
+echo ""
+echo "Restart application:"
+echo "  make start"
