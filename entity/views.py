@@ -28,7 +28,11 @@ class EntityViewSet(viewsets.ModelViewSet):
                     )
                 request.data['path'] = path
             else:
+                # Temporarily allow changes to request data, required to work around unique_together constraint on path
+                _mutable = request.data._mutable
+                request.data._mutable = True
                 request.data['path'] = ''
+                request.data._mutable = _mutable
 
         
         return super().create(request, *args, **kwargs)
@@ -72,7 +76,10 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
         # Get parent entity if exists
         parent_entity = None
         if parent_path:
-            parent_entity = Entity.objects.get(path=parent_path)
+            try:
+                parent_entity = Entity.objects.get(path=parent_path)
+            except Entity.DoesNotExist:
+                return Response({'message': 'Entity parent does not exist.'}, status.HTTP_404_NOT_FOUND)
 
         # Pass request data to serializer
         serializer_data = request.data

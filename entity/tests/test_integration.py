@@ -16,10 +16,10 @@ class EntityViewSetTestCase(APITestCase):
         self.stage2engine1 = Entity.objects.create(name="Engine1", parent=self.stage2)
 
         # Set pathing expectations
-        self.rocket_path = f'/{self.rocket.id}/'
-        self.stage1_path = f'/{self.rocket.id}/{self.stage1.id}/'
-        self.stage1engine1_path = f'/{self.rocket.id}/{self.stage1.id}/{self.stage1engine1.id}/'
-        self.stage1engine2_path = f'/{self.rocket.id}/{self.stage1.id}/{self.stage1engine2.id}/'
+        self.rocket_path = f'/{self.rocket.name}'
+        self.stage1_path = f'/{self.rocket.name}/{self.stage1.name}'
+        self.stage1engine1_path = f'/{self.rocket.name}/{self.stage1.name}/{self.stage1engine1.name}'
+        self.stage1engine2_path = f'/{self.rocket.name}/{self.stage1.name}/{self.stage1engine2.name}'
 
         # Set up URLs
         self.list_url = reverse('entity-list')  # URL for the list view
@@ -75,6 +75,7 @@ class EntityViewSetTestCase(APITestCase):
             "parent": self.rocket.id
         }
         response = self.client.post(self.list_url, data)
+        print('response.data ', response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Entity.objects.filter(name="Kickstage").count(), 1)
 
