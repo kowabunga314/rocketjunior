@@ -3,11 +3,70 @@ info:
   title: ''
   version: 0.0.0
 paths:
+  /{path}:
+    get:
+      operationId: root_retrieve
+      parameters:
+      - in: path
+        name: path
+        schema:
+          type: string
+          pattern: ^.+$
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericEASubtree'
+          description: ''
+    post:
+      operationId: root_create
+      parameters:
+      - in: path
+        name: path
+        schema:
+          type: string
+          pattern: ^.+$
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericEA'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GenericEA'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GenericEA'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericEASubtree'
+          description: ''
   /api/v1/attribute/:
     get:
-      operationId: attribute_list
+      operationId: api_v1_attribute_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
       tags:
-      - attribute
+      - api
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -16,14 +75,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Attribute'
+                $ref: '#/components/schemas/PaginatedAttributeList'
           description: ''
     post:
-      operationId: attribute_create
+      operationId: api_v1_attribute_create
       tags:
-      - attribute
+      - api
       requestBody:
         content:
           application/json:
@@ -48,7 +105,7 @@ paths:
           description: ''
   /api/v1/attribute/{id}/:
     get:
-      operationId: attribute_retrieve
+      operationId: api_v1_attribute_retrieve
       parameters:
       - in: path
         name: id
@@ -57,7 +114,7 @@ paths:
         description: A unique integer value identifying this attribute.
         required: true
       tags:
-      - attribute
+      - api
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -69,7 +126,7 @@ paths:
                 $ref: '#/components/schemas/Attribute'
           description: ''
     put:
-      operationId: attribute_update
+      operationId: api_v1_attribute_update
       parameters:
       - in: path
         name: id
@@ -78,7 +135,7 @@ paths:
         description: A unique integer value identifying this attribute.
         required: true
       tags:
-      - attribute
+      - api
       requestBody:
         content:
           application/json:
@@ -102,7 +159,7 @@ paths:
                 $ref: '#/components/schemas/Attribute'
           description: ''
     patch:
-      operationId: attribute_partial_update
+      operationId: api_v1_attribute_partial_update
       parameters:
       - in: path
         name: id
@@ -111,7 +168,7 @@ paths:
         description: A unique integer value identifying this attribute.
         required: true
       tags:
-      - attribute
+      - api
       requestBody:
         content:
           application/json:
@@ -134,7 +191,7 @@ paths:
                 $ref: '#/components/schemas/Attribute'
           description: ''
     delete:
-      operationId: attribute_destroy
+      operationId: api_v1_attribute_destroy
       parameters:
       - in: path
         name: id
@@ -143,7 +200,7 @@ paths:
         description: A unique integer value identifying this attribute.
         required: true
       tags:
-      - attribute
+      - api
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -152,9 +209,16 @@ paths:
           description: No response body
   /api/v1/entity/:
     get:
-      operationId: entity_list
+      operationId: api_v1_entity_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
       tags:
-      - entity
+      - api
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -163,14 +227,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Entity'
+                $ref: '#/components/schemas/PaginatedEntityList'
           description: ''
     post:
-      operationId: entity_create
+      operationId: api_v1_entity_create
       tags:
-      - entity
+      - api
       requestBody:
         content:
           application/json:
@@ -195,7 +257,7 @@ paths:
           description: ''
   /api/v1/entity/{id}/:
     get:
-      operationId: entity_retrieve
+      operationId: api_v1_entity_retrieve
       parameters:
       - in: path
         name: id
@@ -204,7 +266,7 @@ paths:
         description: A unique integer value identifying this entity.
         required: true
       tags:
-      - entity
+      - api
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -216,7 +278,7 @@ paths:
                 $ref: '#/components/schemas/Entity'
           description: ''
     put:
-      operationId: entity_update
+      operationId: api_v1_entity_update
       parameters:
       - in: path
         name: id
@@ -225,7 +287,7 @@ paths:
         description: A unique integer value identifying this entity.
         required: true
       tags:
-      - entity
+      - api
       requestBody:
         content:
           application/json:
@@ -249,7 +311,7 @@ paths:
                 $ref: '#/components/schemas/Entity'
           description: ''
     patch:
-      operationId: entity_partial_update
+      operationId: api_v1_entity_partial_update
       parameters:
       - in: path
         name: id
@@ -258,7 +320,7 @@ paths:
         description: A unique integer value identifying this entity.
         required: true
       tags:
-      - entity
+      - api
       requestBody:
         content:
           application/json:
@@ -281,7 +343,7 @@ paths:
                 $ref: '#/components/schemas/Entity'
           description: ''
     delete:
-      operationId: entity_destroy
+      operationId: api_v1_entity_destroy
       parameters:
       - in: path
         name: id
@@ -290,7 +352,7 @@ paths:
         description: A unique integer value identifying this entity.
         required: true
       tags:
-      - entity
+      - api
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -299,7 +361,7 @@ paths:
           description: No response body
   /api/v1/entity/{id}/subtree/:
     get:
-      operationId: entity_subtree_retrieve
+      operationId: api_v1_entity_subtree_retrieve
       parameters:
       - in: path
         name: id
@@ -308,7 +370,7 @@ paths:
         description: A unique integer value identifying this entity.
         required: true
       tags:
-      - entity
+      - api
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -318,6 +380,152 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Entity'
+          description: ''
+  /api/v1/schema:
+    get:
+      operationId: api_v1_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
           description: ''
 components:
   schemas:
@@ -334,11 +542,9 @@ components:
           nullable: true
           maxLength: 256
         value:
-          type: string
+          type: number
+          format: double
           nullable: true
-          maxLength: 256
-        data_type:
-          $ref: '#/components/schemas/DataTypeEnum'
         created_at:
           type: string
           format: date-time
@@ -352,16 +558,6 @@ components:
       - entity
       - id
       - updated_at
-    DataTypeEnum:
-      enum:
-      - str
-      - int
-      - flt
-      type: string
-      description: |-
-        * `str` - String
-        * `int` - Integer
-        * `flt` - Float
     Entity:
       type: object
       properties:
@@ -377,7 +573,11 @@ components:
         path:
           type: string
           nullable: true
-          maxLength: 2048
+        tree_id:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -390,7 +590,83 @@ components:
       - created_at
       - id
       - name
+      - parent
       - updated_at
+    GenericEA:
+      type: object
+      properties:
+        dynamic_dict:
+          type: object
+          additionalProperties:
+            type: string
+    GenericEASubtree:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        path:
+          type: string
+        properties:
+          type: object
+          additionalProperties: {}
+        descendants:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+      required:
+      - descendants
+      - id
+      - name
+      - path
+      - properties
+    PaginatedAttributeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+    PaginatedEntityList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entity'
     PatchedAttribute:
       type: object
       properties:
@@ -404,11 +680,9 @@ components:
           nullable: true
           maxLength: 256
         value:
-          type: string
+          type: number
+          format: double
           nullable: true
-          maxLength: 256
-        data_type:
-          $ref: '#/components/schemas/DataTypeEnum'
         created_at:
           type: string
           format: date-time
@@ -432,7 +706,11 @@ components:
         path:
           type: string
           nullable: true
-          maxLength: 2048
+        tree_id:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
         created_at:
           type: string
           format: date-time

@@ -20,7 +20,12 @@ class Migration(migrations.Migration):
                 ('path', models.CharField(blank=True, max_length=2048, null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='entity.entity')),
+                ('parent', models.ForeignKey(
+                    blank=True,
+                    null=True,
+                    on_delete=django.db.models.deletion.SET_NULL,
+                    to='entity.entity'
+                )),
             ],
         ),
         migrations.CreateModel(

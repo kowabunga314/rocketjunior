@@ -6,4 +6,4 @@ class EntityConfig(AppConfig):
     name = 'entity'
 
     def ready(self):
-        import entity.signals
+        import entity.signals   # noqa: F401

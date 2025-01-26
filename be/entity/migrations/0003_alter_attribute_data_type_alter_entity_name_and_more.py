@@ -13,7 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='attribute',
             name='data_type',
-            field=models.CharField(choices=[('str', 'String'), ('int', 'Integer'), ('dec', 'Decimal')], default='str', max_length=3),
+            field=models.CharField(
+                choices=[('str', 'String'), ('int', 'Integer'), ('dec', 'Decimal')],
+                default='str',
+                max_length=3
+            ),
         ),
         migrations.AlterField(
             model_name='entity',

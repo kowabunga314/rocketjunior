@@ -14,7 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='attribute',
             name='data_type',
-            field=models.CharField(choices=[('str', 'String'), ('int', 'Integer'), ('flt', 'Float')], default='str', max_length=3),
+            field=models.CharField(
+                choices=[('str', 'String'), ('int', 'Integer'), ('flt', 'Float')],
+                default='str',
+                max_length=3
+            ),
         ),
         migrations.AlterField(
             model_name='entity',
@@ -24,6 +28,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='entity',
             name='parent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='descendants', to='entity.entity'),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='descendants',
+                to='entity.entity'
+            ),
         ),
     ]
