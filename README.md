@@ -99,7 +99,23 @@ The floating-point limitation could have been mitigated by choosing a technology
 ## Production Infrastructure
 This project is designed to be deployed to the cloud using Kubernetes. Using containerized components allows images to be built and cached in a container registry like AWS ECR. These images can be used to deploy the application to a series of Kubernetes pods on a service like AWS EKS. Additional effort to implement such a deployment would involve setting up additional infrastructure like an AWS RDS database, DNS records, Kubernetes nodes, etc. Much of this can be handled with an infrastructure-as-code tool such as Terraform. I would choose Helm to generate Kubernetes manifests because it allows deployments to be broken down by their individual components, and it supports versioning of deployments.
 
-## Deployments
+### Summary of Infrastructure
+* Containerized application
+* Container images contain application in a highly specific environment
+* Some services that reside in containers locally can be run directly from cloud services, such as:
+  * Database: AWS RDS
+    * Backups
+    * Replication & Failover
+  * Redis Cache: AWS Elasticache
+  * Sensitive Data Management: AWS Secrets Manager or GitHub Secrets
+* Some new services are required that are not needed localy, such as:
+  * Ingress
+  * Load Balancing
+  * DNS
+* Use Helm to break deployment into manageable and logical pieces and to construct Kubernetes manifests
+* Use CI/CD tool like GitHub Actions to orchestrate testing, validation, and deployment of application
+  * Workflows and automations can be controlled manually or be event-driven
+  * Likely setup: automatic test and validation runs when a pull request is created, automatic deploys to test environments after pull requests merged, automatic deploys to production when a release tag is created
 
 ## Secret Handling
 Secret handling during deployments is a major concern regarding application security. This project uses an extremely thin environment file (which wasn't strictly necessary because its contents are not particulary sensitive) as a kind of stand-in for more robust secret handling. In a production deployment, sensitive data can be injected into the deployment using a service like GitHub Secrets or AWS Secrets Manager. This approach provides a centralized control for all secrets ensures that sensitive data remains encrypted in transit to the application.
@@ -108,11 +124,10 @@ Secret handling during deployments is a major concern regarding application secu
 CI/CD is critical to the success of an enterprise-level application...
 
 ## Authentication
+This project retains the default Basic Auth configuration that all new Django projects start with. I would like to have removed this functionality from the project, knowing that it will only ever run as a demo on personal devices with no sensitive information being stored within it. I made the decision to leave authentication in place because part of this project is to explore how an application like this would be deployed to a production environment. If this application needed to be prepared for release, I would get to work on replacing Basic Auth with JWTs for a more secure application that is prepared to support more advanced authentication schemes like OAuth.
 
 # Assumptions & Deviations
 * Assumption: Given the information I have, this project could be used in write-heavy applicaitons like hardware design or in read-heavy applications like analytics. For this reason, I have chosen to balance read and write efficiency.
 * Assumption: I am to design this application with production-readiness in mind. This was a driver behind the choice to use tools like Docker/Docker-Compose, direnv, and leaving authentication enabled on a demo app that will not actually run in a production environment.
 * Deviation: I have included the `path` field in the response payload. This makes it very easy to understand where a node is located in a tree. If there is a hard business requirement to exclude this field from the response payload, it can be easily disabled in the `ModelSerializer` class.
 * Deviation: Attributes in response payload are not represented as Decimal values while retaining originally-provided decimal precision. This has been discussed in previous sections, but in short, JSON does not support decimal formatting but does offer simple workarounds that are not disruptive to most REST API use cases.
-
-# Additional Thoughts
