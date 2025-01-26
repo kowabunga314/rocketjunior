@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -114,7 +114,27 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
                 'path',
                 OpenApiTypes.STR,
                 OpenApiParameter.PATH,
-                description='Path to a node from the root node.'
+                description='Path to a node from the root node.',
+                examples=[
+                    OpenApiExample(
+                        'Get Root Node Subtree',
+                        summary='Get Root Node Subtree',
+                        description='Gets the subtree of the root node called "Rocket"',
+                        value='/Rocket'
+                    ),
+                    OpenApiExample(
+                        'Get Engine1 Subtree',
+                        summary='Get Engine1 Subtree',
+                        description='Gets the subtree of the descendant node called "Engine1"',
+                        value='/Rocket/Stage1/Engine1'
+                    ),
+                    OpenApiExample(
+                        'Get Stage2 Subtree',
+                        summary='Get Stage2 Subtree',
+                        description='Gets the subtree of the descendant node called "Stage2"',
+                        value='/Rocket/Stage2'
+                    )
+                ]
             ),
             OpenApiParameter(
                 'precise',
@@ -143,7 +163,27 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
                 'path',
                 OpenApiTypes.STR,
                 OpenApiParameter.PATH,
-                description='Path to a node from the root node.'
+                description='Path to a node from the root node.',
+                examples=[
+                    OpenApiExample(
+                        'Alter Root Node Subtree',
+                        summary='Alter Root Node Subtree',
+                        description='Creates or adds properties the to the root node called "Rocket"',
+                        value='/Rocket'
+                    ),
+                    OpenApiExample(
+                        'Alter Engine1 Subtree',
+                        summary='Alter Engine1 Subtree',
+                        description='Creates or adds properties the to the descendant node called "Engine1"',
+                        value='/Rocket/Stage1/Engine1'
+                    ),
+                    OpenApiExample(
+                        'Alter Stage2 Subtree',
+                        summary='Alter Stage2 Subtree',
+                        description='Creates or adds properties the to the descendant node called "Stage2"',
+                        value='/Rocket/Stage2'
+                    )
+                ]
             ),
             OpenApiParameter(
                 'precise',

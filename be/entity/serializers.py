@@ -57,6 +57,24 @@ class AttributeSerializer(serializers.ModelSerializer):
         return cast_value
 
 
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            name='get_root_subtree',
+            summary='Get Root Subtree',
+            description='Gets the subtree of root node "Rocket"',
+            value='/Rocket',
+            request_only=True
+        ),
+        OpenApiExample(
+            name='get_engine_subtree',
+            summary='Get Engine Subtree',
+            description='Gets the subtree of Engine1 from Stage1',
+            value='/Rocket/Stage1/Engine1',
+            request_only=True
+        )
+    ]
+)
 class GenericEASerializer(serializers.ModelSerializer):
     dynamic_dict = serializers.DictField(child=serializers.CharField(), required=False)
 
