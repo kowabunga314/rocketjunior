@@ -1,3 +1,4 @@
+from decimal import Decimal, ROUND_DOWN
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
@@ -64,6 +65,7 @@ class Entity(models.Model):
         if root:
             data['parent'] = self.parent.name if self.parent is not None else None
         data['properties'] = self._get_attributes()
+        print('properties: ', data['properties'])
         data['descendants'] = [x._repr() for x in self.descendants.all()]
 
         return data
@@ -72,21 +74,40 @@ class Entity(models.Model):
         return f'{self.name}: {self.path}'
 
     def _get_attributes(self):
-        return {a.key: a.value for a in self.attributes.all()}
+        for a in self.attributes.all():
+            print('a.get_value(): ', a.get_value())
+        return {a.key: a.get_value() for a in self.attributes.all()}
 
 
 class Attribute(models.Model):
     entity = models.ForeignKey(to=Entity, null=False, blank=False, on_delete=models.CASCADE, related_name='attributes')
     key = models.CharField(max_length=256, null=True, blank=True)
-    value = models.FloatField(null=True, blank=True)
+    value = models.DecimalField(max_digits=20, decimal_places=10, null=True, blank=True)
+    str_value = models.CharField(max_length=31)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['entity', 'key'],
+                condition=models.Q(entity__isnull=False, key__isnull=False),
+                name='unique_entity_key'
+            )
+        ]
+    
+    def save(self, *args, **kwargs):
+        self.str_value = str(self.value)
+
+        # Save the object
+        super().save(*args, **kwargs)
+
+    def get_value(self):
+        return self.value.quantize(Decimal(self.str_value), rounding=ROUND_DOWN)
 
     def as_dict(self):
-        return {self.key: self.value}
+        return {self.key: self.get_value()}
 
     def __str__(self):
         return f'({self.key}: {self.value})'

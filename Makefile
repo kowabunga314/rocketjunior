@@ -16,3 +16,6 @@ test:
 
 stop:
 	docker compose stop
+
+destroy:
+	docker compose down -v

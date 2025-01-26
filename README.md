@@ -50,6 +50,9 @@ Selecting Docker and Docker Compose to support this project was an easy choice. 
 
 ## Managing Node Paths
 
+## Decimal Precision of Property Values
+JSON does not support trailing-zero precision of decimal values. In the likely scenario that this application's clients would be other software applications, string values would be used to transmit decimal properties, which would then be converted back into decimal values by the endpoint's consumer. This is a known limitation of JSON and is a fairly common workaround. I added the optional `precision` query parameter to my API endpoints to allow clients to select whether they want to receive truncated decimal values or string values with preserved precision.
+
 
 # Caveats
 ## Expensive Writes

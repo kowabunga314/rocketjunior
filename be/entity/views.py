@@ -1,9 +1,13 @@
+import json
+import re
+from decimal import Decimal, ROUND_DOWN
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from entity.models import Attribute, Entity
@@ -72,14 +76,50 @@ class AttributeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class SimpleUseViewSet(viewsets.ModelViewSet):
+class CustomJSONRenderer(JSONRenderer):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        if isinstance(data, dict):
+            precise = None
+            request = renderer_context.get('request', None)
+            if request:
+                precise = request.query_params.get('precise', None)
+            self._convert_decimals(data, precise)
+        return super().render(data, accepted_media_type, renderer_context)
 
+    def _convert_decimals(self, data, precise=None):
+        for key, value in data.items():
+            if isinstance(value, Decimal):
+                # Handle precision of output
+                if precise == 'true':
+                    data[key] = str(value)
+                else:
+                    data[key] = value
+            elif isinstance(value, dict):
+                self._convert_decimals(value, precise)
+
+
+class SimpleUseViewSet(viewsets.ModelViewSet):
+    renderer_classes = [CustomJSONRenderer]
     queryset = Entity.objects.all()
     serializer_class = GenericEASerializer
 
     @extend_schema(
         summary='View a Node\'s Subtree',
         description='Get a node\'s subtree by providing its path in the URL.',
+        parameters=[
+            OpenApiParameter(
+                'path',
+                OpenApiTypes.STR,
+                OpenApiParameter.PATH,
+                description='Path to a node from the root node.'
+            ),
+            OpenApiParameter(
+                'precise',
+                OpenApiTypes.BOOL,
+                OpenApiParameter.QUERY,
+                description='Display precise decimal values as strings.'
+            )
+        ],
         responses={200: GenericEASubtreeSerializer},
     )
     def get(self, request, *args, **kwargs):
@@ -94,7 +134,21 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
     @extend_schema(
         summary='Create a Node or Attribute',
         description='Create a node by leaving the payload blank, or an attribute by including key/value pairs where \
-            type(value) == float.',
+            type(value) == Decimal.',
+        parameters=[
+            OpenApiParameter(
+                'path',
+                OpenApiTypes.STR,
+                OpenApiParameter.PATH,
+                description='Path to a node from the root node.'
+            ),
+            OpenApiParameter(
+                'precise',
+                OpenApiTypes.BOOL,
+                OpenApiParameter.QUERY,
+                description='Display precise decimal values as strings.'
+            )
+        ],
         request=GenericEAInputSerializer,
         responses={201: GenericEASubtreeSerializer},
     )
@@ -114,13 +168,15 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
                 return Response({'message': 'Entity parent does not exist.'}, status.HTTP_404_NOT_FOUND)
 
         # Pass request data to serializer
+        attributes = self._parse_attribute_body(request.body)
         serializer_data = request.data
         serializer = GenericEASerializer(
             data=serializer_data,
             context={
                 'path': full_path,
                 'entity_name': entity_name,
-                'parent_entity': parent_entity
+                'parent_entity': parent_entity,
+                'attributes': attributes
             }
         )
         # Validate request data and return response
@@ -128,3 +184,12 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
             body = serializer.save()
             return Response(body, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def _parse_attribute_body(self, body):
+        """Parses request body from byte string to preserve decimal precision."""
+        pattern = r'"([^"]+)":\s*([^,}]+)'
+        matches = re.findall(pattern, str(body).replace('\\n', ''))
+        attributes = {i[0]: Decimal(i[1]) for i in matches}
+        print('attributes: ', attributes)
+        return attributes
+
