@@ -41,7 +41,7 @@ class Entity(models.Model):
                     }
                 })
         # Update child paths
-        Entity.objects.update_child_paths(old_path, self.path)
+        Entity.objects.update_child_paths_raw(old_path, self.path)
 
         # Save the object
         super().save(*args, **kwargs)

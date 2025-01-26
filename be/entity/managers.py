@@ -43,6 +43,30 @@ class EntityManager(models.Manager):
                         [new_path, child_id],
                     )
 
+    def update_child_paths_raw(self, old_path, parent_path):
+        """
+        Updates the paths of all child entities based on the parent entity's path.
+
+        Args:
+            old_path (str): The path belonging to parent entity used to identify update candidates.
+            parent_path (str): The new base path to be applied to children..
+        """
+        if not old_path:
+            # Post-save signal will handle path
+            return
+        if not parent_path:
+            raise ValueError("The parent entity must have a valid path.")
+        # Abort method if paths match
+        if old_path == parent_path:
+            return
+
+        with connection.cursor() as cursor:
+            query = """
+                UPDATE entity_entity
+                SET path = REPLACE(path, %s, %s)
+            """
+            cursor.execute(query, [old_path, parent_path])
+
     def update_child_trees(self, path, tree_id):
         if not path or not tree_id:
             raise ValueError('path and tree_id required.')

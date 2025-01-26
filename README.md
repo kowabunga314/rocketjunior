@@ -12,12 +12,13 @@ Execute the file `setup.sh` to configure local environment:
 Run `make build` to build and start the local environment.
 
 ### Using
-Access the Swagger UI on [your local machine](http://localhost:8000/api/v1/swagger-ui/)
+1. Access the Swagger UI on [your local machine](http://localhost:8000/api/v1/swagger-ui/)
 
-Authenticate to the Swagger UI using the credentials provided with this submission.
+2. Authenticate to the Swagger UI using the credentials provided with this submission.
 
 To show all API endpoints in Swagger including the model extension endpoints, set  `HIDE_API_EXTENSIONS=false` in `./be/.envrc`.
 
+Run tests with ```make test```
 
 # Introduction
 The interview process for Senior Ground Software Engineer at Rocket Lab asks candidates to complete a coding project to prove their proficiency. I was asked to choose either a backend or frontend problem to solve, this project focuses on the backend side of the two challenges offered.
@@ -84,7 +85,14 @@ JSON does not support trailing-zero precision of decimal values. In the likely s
 
 # Caveats
 ## Expensive Writes
-Updating entities can cause somewhat expensive write operations. As stated in the
+Updating entities can cause somewhat expensive write operations. Create operations are cheap, but updates can require changes to many records if the node being updated has many descendants. While this expense cannot be eliminated entirely, it can be greatly reduced by 
+
+## Decimal Precision in JSON Payloads
+In JSON, decimal values are represented as floating-point numbers, and as a result do not natively support formatting of decimals to retain decimal precision in transit. This limitation can be worked around by passing decimal values as strings to retain their original precision. Because the project prompt specified decimals with trailing-zero precision in the payload, I was unable to entirely meet this specific requirement. The trade-off I chose was to add an optional `precision` query parameter to the subtree API endpoint to allow clients to specify whether they want to receive JSON floating-point decimal values without precision preservation, or string-formatted decimal values with the original precision preserved in the response payload.
+
+I believe that this is an acceptable trade-off. JSON is an industry standard and commonly used by enterprises across the globe and drawbacks like this must be worked around on a regular basis. Because this is a REST API, consumers of the subtree endpoint are likely to be other software applications like frontends or app integrations that can accommodate the need to parse string-formatted decimals back into true decimal types.
+
+The floating-point limitation could have been mitigated by choosing a technology like GraphQL to retrieve information from the database. This approach would have worked well if I had chosen to use a graph database.
 
 
 # Production-Readiness
@@ -100,5 +108,11 @@ Secret handling during deployments is a major concern regarding application secu
 CI/CD is critical to the success of an enterprise-level application...
 
 ## Authentication
+
+# Assumptions & Deviations
+* Assumption: Given the information I have, this project could be used in write-heavy applicaitons like hardware design or in read-heavy applications like analytics. For this reason, I have chosen to balance read and write efficiency.
+* Assumption: I am to design this application with production-readiness in mind. This was a driver behind the choice to use tools like Docker/Docker-Compose, direnv, and leaving authentication enabled on a demo app that will not actually run in a production environment.
+* Deviation: I have included the `path` field in the response payload. This makes it very easy to understand where a node is located in a tree. If there is a hard business requirement to exclude this field from the response payload, it can be easily disabled in the `ModelSerializer` class.
+* Deviation: Attributes in response payload are not represented as Decimal values while retaining originally-provided decimal precision. This has been discussed in previous sections, but in short, JSON does not support decimal formatting but does offer simple workarounds that are not disruptive to most REST API use cases.
 
 # Additional Thoughts
