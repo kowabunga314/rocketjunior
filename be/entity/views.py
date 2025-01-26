@@ -1,12 +1,26 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from entity.models import Attribute, Entity
-from entity.serializers import AttributeSerializer, EntitySerializer, GenericEASerializer
+from entity.serializers import (
+    AttributeSerializer, EntitySerializer, GenericEASerializer, GenericEAInputSerializer, GenericEASubtreeSerializer
+)
 
 
+@extend_schema_view(
+    list=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    retrieve=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    create=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    update=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    partial_update=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    destroy=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    subtree=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+)
 class EntityViewSet(viewsets.ModelViewSet):
     queryset = Entity.objects.all()
     serializer_class = EntitySerializer
@@ -44,6 +58,14 @@ class EntityViewSet(viewsets.ModelViewSet):
         return f'/{name}'
 
 
+@extend_schema_view(
+    list=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    retrieve=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    create=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    update=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    partial_update=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+    destroy=extend_schema(exclude=settings.HIDE_API_EXTENSIONS),
+)
 class AttributeViewSet(viewsets.ModelViewSet):
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
@@ -55,6 +77,11 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
     queryset = Entity.objects.all()
     serializer_class = GenericEASerializer
 
+    @extend_schema(
+        summary='View a Node\'s Subtree',
+        description='Get a node\'s subtree by providing its path in the URL.',
+        responses={200: GenericEASubtreeSerializer},
+    )
     def get(self, request, *args, **kwargs):
         # Get path and eliminate trailing slash if present
         full_path = '/' + kwargs.get('path').strip('/')
@@ -64,6 +91,13 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
         except Entity.DoesNotExist:
             return Response({'message': 'Entity not found.'})
 
+    @extend_schema(
+        summary='Create a Node or Attribute',
+        description='Create a node by leaving the payload blank, or an attribute by including key/value pairs where \
+            type(value) == float.',
+        request=GenericEAInputSerializer,
+        responses={201: GenericEASubtreeSerializer},
+    )
     def create(self, request, *args, **kwargs):
         # Set up context fields from path kwarg
         full_path = '/' + kwargs.get('path')

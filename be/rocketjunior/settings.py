@@ -159,3 +159,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # App settings
 APPEND_SLASH = True
+HIDE_API_EXTENSIONS = config('HIDE_API_EXTENSIONS')

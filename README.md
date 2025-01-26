@@ -6,15 +6,17 @@ System for organizational hierarchy of hardware.
 ### Setup
 Execute the file `setup.sh` to configure local environment:
 
-```./setup.sh```
+```make init```
 
 ### Running
-Run `docker compose up -d` to start the local environment.
+Run `make build` to build and start the local environment.
 
 ### Using
 Access the Swagger UI on [your local machine](http://localhost:8000/api/v1/swagger-ui/)
 
 Authenticate to the Swagger UI using the credentials provided with this submission.
+
+To show all API endpoints in Swagger including the model extension endpoints, delete the value of the `HIDE_API_EXTENSIONS` setting in `./be/.envrc`.
 
 
 # Rationale

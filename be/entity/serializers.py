@@ -1,4 +1,6 @@
 from django.db import transaction
+from drf_spectacular.utils import extend_schema_field, extend_schema_serializer, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -52,11 +54,13 @@ class GenericEASerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Get dynamic_dict
         dynamic_dict = validated_data.get('dynamic_dict', {})
-        if not dynamic_dict:
-            # Create entity if no payload
-            return self._handle_create_entity(self.context)
+        # Create entity if entity does not exist
+        if not Entity.objects.filter(path=self.context.get('path')).exists():
+            response = self._handle_create_entity(self.context)
         # Create attribute if payload
-        return self._handle_create_attribute(dynamic_dict, self.context)
+        if dynamic_dict:
+            response = self._handle_create_attribute(dynamic_dict, self.context)
+        return response
 
     def _handle_create_entity(self, context):
         name = self.context.get('entity_name')
@@ -78,3 +82,51 @@ class GenericEASerializer(serializers.ModelSerializer):
                 )
         entity.refresh_from_db()
         return entity.subtree()
+
+
+
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            name='create_node',
+            summary='Create Node',
+            description='Creates a new node at a given path',
+            value={},
+            request_only=True
+        ),
+        OpenApiExample(
+            name='create_node_properties',
+            summary='Create Node Properties',
+            description='Creates properties on a node at a given path',
+            value={'key': 'value'},
+            request_only=True
+        ),
+        OpenApiExample(
+            name='create_several_node_properties',
+            summary='Create Several Node Properties',
+            description='Creates several properties on a node at a given path',
+            value={'Thrust': 100, 'ISP': 300.000, 'Mass': 15000},
+            request_only=True
+        )
+    ]
+)
+class GenericEAInputSerializer(serializers.Serializer):
+    key = serializers.CharField(
+        allow_null=True,
+        allow_blank=True,
+        help_text="A dictionary where keys are dynamic, and values are strings."
+    )
+
+
+class GenericEASubtreeSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    path = serializers.CharField()
+    properties = serializers.DictField()
+    descendants = serializers.SerializerMethodField()
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_descendants(self, obj):
+        # Generate descendants recursively based on the current object
+        descendants = obj.get('descendants', [])
+        return GenericEASubtreeSerializer(descendants, many=True).data

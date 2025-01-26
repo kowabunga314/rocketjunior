@@ -5,9 +5,9 @@ from entity.managers import EntityManager
 
 
 class Entity(models.Model):
-    name = models.CharField(max_length=256, null=False, blank=False)
+    name = models.CharField(max_length=256, null=False, blank=False, db_index=True)
     parent = models.ForeignKey(to='self', null=True, blank=True, on_delete=models.SET_NULL, related_name='descendants')
-    path = models.CharField(max_length=2048, null=True, blank=True)
+    path = models.CharField(max_length=2048, null=True, blank=True, db_index=True)
     tree_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
