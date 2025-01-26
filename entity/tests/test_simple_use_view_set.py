@@ -12,6 +12,20 @@ class SimpleUseViewSetTestCase(APITestCase):
         self.engine1 = Entity.objects.create(name='Engine1', parent=self.stage1)
 
     def test_get_entity_subtree(self):
+        # Create a few more entities
+        engine2 = Entity.objects.create(name='Engine2', parent=self.stage1)
+        engine3 = Entity.objects.create(name='Engine3', parent=self.stage1)
+        turbopump1 = Entity.objects.create(name='Turbopump1', parent=self.engine1)
+        # Create a few attributes
+        thrust = 9.493
+        isp = 12.156
+        mass = 175.000
+        Attribute.objects.create(entity=self.engine1, key='Thrust', value=thrust)
+        Attribute.objects.create(entity=self.engine1, key='ISP', value=isp)
+        Attribute.objects.create(entity=turbopump1, key='Mass', value=mass)
+        # Refresh entities with attributes
+        self.engine1.refresh_from_db()
+        turbopump1.refresh_from_db()
         # Test GET request for an existing entity
         url = reverse('simple-use-api', kwargs={'path': 'Rocket/Stage1'})
         response = self.client.get(url)
@@ -19,7 +33,32 @@ class SimpleUseViewSetTestCase(APITestCase):
         # Verify that the subtree contains the child entity in the expected location
         descendants = response.data.get('descendants')
         descendant_names = [d.get('name') for d in descendants]
-        self.assertIn('Engine1', descendant_names)
+        self.assertIn(self.engine1.name, descendant_names)
+        self.assertIn(engine2.name, descendant_names)
+        self.assertIn(engine3.name, descendant_names)
+        # Verify that Engine1 attributes are formed correctly
+        engine1_data = [d for d in descendants if d.get('name') == self.engine1.name][0]
+        self.assertIn('Thrust', engine1_data.get('properties').keys())
+        self.assertIn('ISP', engine1_data.get('properties').keys())
+        self.assertEqual(engine1_data.get('properties').get('Thrust'), thrust)
+        self.assertEqual(engine1_data.get('properties').get('ISP'), isp)
+        # Get Turbopump1 data from Engine1
+        self.assertIn(turbopump1.name, [d.get('name') for d in engine1_data.get('descendants')])
+        turbopump1_data = engine1_data.get('descendants')[0]
+        # Verify Turbopump1 path
+        self.assertEqual(turbopump1_data.get('path'), turbopump1.path)
+        # Verify Turbopump1 attributes
+        self.assertIn('Mass', turbopump1_data.get('properties').keys())
+        self.assertEqual(turbopump1_data.get('properties').get('Mass'), mass)
+        # Create an unrelated entity
+        Entity.objects.create(name='Rocket2', parent=None)
+        # Get unrelated entity's subtree
+        url = reverse('simple-use-api', kwargs={'path': 'Rocket2'})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Verify that the subtree contains the child entity in the expected location
+        descendants = response.data.get('descendants')
+        self.assertEqual(len(descendants), 0)
 
     def test_get_entity_not_found(self):
         # Test GET request for a non-existent entity
