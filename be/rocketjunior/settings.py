@@ -134,6 +134,28 @@ REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': True
 }
 
+# DRF-SPECTACULAR
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Rocket Junior API Documentation',
+    'DESCRIPTION': '''Use this page to test the Rocket Junior API. 
+        Find helpful hints in the request detail section.
+        \nAuthenticate within the page by clicking the lock icon and logging in with credentials provided with 
+        submission email.
+        \nTips for Use:
+        \n* All requests return subtrees.
+        \n* POST requests without a request body create a new entity at the specified path if the path is valid.
+        \n* POST requests with a request body containing a one-level dictionary populated with key/value pairs 
+        will create an attribute on the entity at the specified path if the path is valid. The value must be 
+        of a type that can be cast to a Decimal value in Python. (i.e. {"foo": 1})
+        \n* The "precise" query argument will toggle attribute values in the response between a precise string 
+        representation and an imprecise float representation with truncated trailing zeros''',
+    'VERSION': 'v0.2.0',
+    'CONTACT': {
+        'name': 'Dylan Frost',
+        'email': 'dougfrost314@gmail.com'
+    }
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

@@ -169,20 +169,6 @@ class AttributeViewSetTestCase(APITestCase):
         from django.contrib.auth.models import User
         return User.objects.create_user(username="testuser", password="password")
 
-    @skip
-    def test_get_entity_with_attributes(self):
-        """Test that the detail endpoint returns the correct entity attributes."""
-        detail_url = reverse('entity-detail', args=[self.stage1engine1.id])
-        response = self.client.get(detail_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get('name'), self.stage1engine1.name)
-        thrust_value = self.stage1engine1.attributes.filter(key='Thrust').first().value
-        isp_value = self.stage1engine1.attributes.filter(key='ISP').first().value
-
-        self.stage1engine1.refresh_from_db()
-        self.assertEqual(self.stage1engine1.properties.get('Thrust'), thrust_value)
-        self.assertEqual(self.stage1engine1.properties.get('ISP'), isp_value)
-
     def test_add_attribute_to_entity(self):
         """Test that we can add a new attribute to an entity."""
         data = {
