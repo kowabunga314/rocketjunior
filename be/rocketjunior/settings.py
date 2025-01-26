@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from decouple import config
 import dj_database_url
 from pathlib import Path
@@ -80,7 +81,7 @@ WSGI_APPLICATION = 'rocketjunior.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL'),
+        default=os.getenv('DATABASE_URL'),
         conn_max_age=0
     )
 }
@@ -182,4 +183,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # App settings
 APPEND_SLASH = True
-HIDE_API_EXTENSIONS = config('HIDE_API_EXTENSIONS') == 'true'
+HIDE_API_EXTENSIONS = os.getenv('HIDE_API_EXTENSIONS') == 'true'

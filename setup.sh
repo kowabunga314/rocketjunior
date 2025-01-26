@@ -2,7 +2,7 @@
 
 # Hint: Ensure that docker, docker-compose, and direnv are installed
 echo "Checking dependencies..."
-for cmd in docker direnv; do
+for cmd in docker; do
   if ! command -v $cmd &> /dev/null; then
     echo -e "\033[31m $cmd is not installed. Please install it before proceeding.\033[0m"
     echo "Examples:"
@@ -12,11 +12,6 @@ for cmd in docker direnv; do
     exit 1
   fi
 done
-
-echo "Allowing direnv..."
-cd be || exit
-direnv allow || { echo "Failed to allow direnv. Ensure direnv is installed and configured."; exit 1; }
-cd ..
 
 echo ""
 echo "===================================================="
