@@ -2,6 +2,7 @@ import json
 import re
 from decimal import Decimal, ROUND_DOWN
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -87,15 +88,18 @@ class CustomJSONRenderer(JSONRenderer):
         return super().render(data, accepted_media_type, renderer_context)
 
     def _convert_decimals(self, data, precise=None):
-        for key, value in data.items():
-            if isinstance(value, Decimal):
+        data_keys = data.keys()
+        if 'properties' in data_keys and len(data.get('properties').keys()) > 0:
+            for key, value in data.get('properties').items():
                 # Handle precision of output
                 if precise == 'true':
-                    data[key] = str(value)
+                    data['properties'][key] = str(value)
                 else:
-                    data[key] = value
-            elif isinstance(value, dict):
-                self._convert_decimals(value, precise)
+                    data['properties'][key] = value
+        if 'descendants' in data_keys:
+            # print('value: ', value)
+            for d in data.get('descendants'):
+                self._convert_decimals(d, precise)
 
 
 class SimpleUseViewSet(viewsets.ModelViewSet):
@@ -181,7 +185,11 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
         )
         # Validate request data and return response
         if serializer.is_valid():
-            body = serializer.save()
+            try:
+                body = serializer.save()
+            except ValidationError as e:
+                return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+
             return Response(body, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

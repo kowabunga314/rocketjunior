@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 from collections import defaultdict
 from django.db import models, connection, transaction
 
@@ -71,7 +71,8 @@ class EntityManager(models.Manager):
                     e.path AS entity_path, 
                     e.parent_id AS parent_id,
                     a.key AS attribute_key, 
-                    a.value AS attribute_value
+                    a.value AS attribute_value,
+                    a.str_value AS attribute_quantizer
                 FROM entity_entity e
                 LEFT JOIN entity_attribute a ON e.id = a.entity_id
                 WHERE e.path LIKE %s
@@ -90,7 +91,7 @@ class EntityManager(models.Manager):
 
         for row in rows:
             # Break up row into fields
-            entity_id, name, path, parent_id, attr_key, attr_value = row
+            entity_id, name, path, parent_id, attr_key, attr_value, attr_quantizer = row
             # Ensure each entity is in the dictionary
             if entity_id not in entities:
                 # Save entity using path as key
@@ -104,12 +105,14 @@ class EntityManager(models.Manager):
 
             # Add attributes to the corresponding entity
             if attr_key:
-                attributes[entity_id][attr_key] = Decimal(attr_value) if attr_value else None
+                attributes[path][attr_key] = attr_value.quantize(
+                    Decimal(attr_quantizer), rounding=ROUND_DOWN
+                ) if attr_value and attr_quantizer else None
 
         # Merge attributes into entities
-        for entity_id, props in attributes.items():
-            if entity_id in entities:
-                entities[entity_id]["properties"] = props
+        for entity_path, props in attributes.items():
+            if entity_path in entities:
+                entities[entity_path]["properties"] = props
 
         # Construct the subtree
         tree = {}

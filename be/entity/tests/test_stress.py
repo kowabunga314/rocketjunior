@@ -21,6 +21,7 @@ class LargeDatasetTest(APITestCase):
                 cursor.execute(sql_file.read())
     
     def test_tree_performance(self):
+        """Tests subtree performance on tree with over 40,000 nodes"""
         # Set up request
         root_path = '/Node.1.0'
         root_entity = Entity.objects.get(path=root_path)

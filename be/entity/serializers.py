@@ -1,4 +1,4 @@
-from decimal import Decimal, localcontext, ROUND_DOWN
+from decimal import Decimal, InvalidOperation, localcontext, ROUND_DOWN
 from django.db import transaction
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -44,11 +44,17 @@ class RoundingDecimalField(serializers.DecimalField):
 
 class AttributeSerializer(serializers.ModelSerializer):
     value = serializers.DecimalField(max_digits=20, decimal_places=3, coerce_to_string=True)
-    # value = serializers.CharField(max_length=31)
     
     class Meta:
         model = Attribute
         fields = ['id', 'entity', 'key', 'value', 'created_at', 'updated_at']
+
+    def validate_value(self, value):
+        try:
+            cast_value = Decimal(value)
+        except InvalidOperation:
+            raise serializers.ValidationError('Values must be a decimal number.')
+        return value
 
 
 class GenericEASerializer(serializers.ModelSerializer):

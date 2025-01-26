@@ -40,6 +40,7 @@ class SimpleUseViewSetTestCase(APITestCase):
         self.assertIn(engine3.name, descendant_names)
         # Verify that Engine1 attributes are formed correctly
         engine1_data = [d for d in descendants if d.get('name') == self.engine1.name][0]
+        self.engine1.refresh_from_db()
         self.assertIn('Thrust', engine1_data.get('properties').keys())
         self.assertIn('ISP', engine1_data.get('properties').keys())
         self.assertEqual(engine1_data.get('properties').get('Thrust'), thrust)

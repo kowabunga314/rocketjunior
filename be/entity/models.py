@@ -63,7 +63,7 @@ class Entity(models.Model):
         data['path'] = self.path
         if root:
             data['parent'] = self.parent.name if self.parent is not None else None
-        data['properties'] = self._get_attributes()
+        data['properties'] = self.get_attributes()
         data['descendants'] = [x._repr() for x in self.descendants.prefetch_related('descendants')]
 
         return data
@@ -71,7 +71,7 @@ class Entity(models.Model):
     def __str__(self):
         return f'{self.name}: {self.path}'
 
-    def _get_attributes(self):
+    def get_attributes(self):
         return {a.key: a.get_value() for a in self.attributes.all()}
 
 
