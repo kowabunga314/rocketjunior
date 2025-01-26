@@ -92,7 +92,7 @@ class Attribute(models.Model):
                 name='unique_entity_key'
             )
         ]
-    
+
     def save(self, *args, **kwargs):
         self.str_value = str(self.value)
 

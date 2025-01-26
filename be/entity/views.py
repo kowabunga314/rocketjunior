@@ -1,10 +1,9 @@
-import json
 import re
-from decimal import Decimal, ROUND_DOWN
+from decimal import Decimal
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -199,4 +198,3 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
         matches = re.findall(pattern, str(body).replace('\\n', ''))
         attributes = {i[0]: Decimal(i[1]) for i in matches}
         return attributes
-

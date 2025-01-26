@@ -62,15 +62,15 @@ class EntityManager(models.Manager):
 
     def path_exists(self, path):
         return [d.id for d in self.filter(path=path)]
-    
+
     def fetch_descendants(self, root_path):
         with connection.cursor() as cursor:
             query = """
-                SELECT e.id AS entity_id, 
-                    e.name AS entity_name, 
-                    e.path AS entity_path, 
+                SELECT e.id AS entity_id,
+                    e.name AS entity_name,
+                    e.path AS entity_path,
                     e.parent_id AS parent_id,
-                    a.key AS attribute_key, 
+                    a.key AS attribute_key,
                     a.value AS attribute_value,
                     a.str_value AS attribute_quantizer
                 FROM entity_entity e
@@ -81,7 +81,7 @@ class EntityManager(models.Manager):
             cursor.execute(query, [f"{root_path}%"])
             rows = cursor.fetchall()
         return rows
-    
+
     def build_tree(self, root_path):
         rows = self.fetch_descendants(root_path)
 
@@ -117,7 +117,7 @@ class EntityManager(models.Manager):
         # Construct the subtree
         tree = {}
         for entity in entities.values():
-            if entity["path"] == root_path: 
+            if entity["path"] == root_path:
                 # Handle root node
                 tree = entity
             else:
@@ -129,4 +129,3 @@ class EntityManager(models.Manager):
                     parent["descendants"].append(entity)
 
         return tree
-

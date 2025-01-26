@@ -148,7 +148,7 @@ SPECTACULAR_SETTINGS = {
         will create an attribute on the entity at the specified path if the path is valid. The value must be 
         of a type that can be cast to a Decimal value in Python. (i.e. {"foo": 1})
         \n* The "precise" query argument will toggle attribute values in the response between a precise string 
-        representation and an imprecise float representation with truncated trailing zeros''',
+        representation and an imprecise float representation with truncated trailing zeros''',  # noqa: W291
     'VERSION': 'v0.2.0',
     'CONTACT': {
         'name': 'Dylan Frost',

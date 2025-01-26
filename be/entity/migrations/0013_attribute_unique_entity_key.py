@@ -12,6 +12,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name='attribute',
-            constraint=models.UniqueConstraint(condition=models.Q(('entity__isnull', False), ('key__isnull', False)), fields=('entity', 'key'), name='unique_entity_key'),
+            constraint=models.UniqueConstraint(
+                condition=models.Q(('entity__isnull', False), ('key__isnull', False)),
+                fields=('entity', 'key'),
+                name='unique_entity_key'
+            ),
         ),
     ]
