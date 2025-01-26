@@ -16,12 +16,27 @@ Access the Swagger UI on [your local machine](http://localhost:8000/api/v1/swagg
 
 Authenticate to the Swagger UI using the credentials provided with this submission.
 
-To show all API endpoints in Swagger including the model extension endpoints, delete the value of the `HIDE_API_EXTENSIONS` setting in `./be/.envrc`.
+To show all API endpoints in Swagger including the model extension endpoints, set  `HIDE_API_EXTENSIONS=false` in `./be/.envrc`.
 
+
+# Introduction
+The interview process for Senior Ground Software Engineer at Rocket Lab asks candidates to complete a coding project to prove their proficiency. I was asked to choose either a backend or frontend problem to solve, this project focuses on the backend side of the two challenges offered.
+
+The tasks laid out for this challenge:
+- Design a database to support deeply-nested self-referential node relationships and arbitrary assignment of key/value pairs to nodes
+  - The path of a node can be inferred from its hierarchy
+  - There are no name requirements on descendant nodes
+  - There is no limit to descendant node depth
+  - Nodes can have any number of descendant nodes or properties
+- Seed the database with basic test data
+- Expose HTTP endpoints to:
+  - Create a node with a specified ancestor
+  - Add a property to a specific node
+  - Return the subtree of nodes with their properties for a provided node path
 
 # Rationale
 ## Database Design
-My task was to design a database that can support deeply-nested self-referential relationships. I took several different approaches and technologies into consideration, and ultimately selected an implementation of a "path" column designed to balance the cost and efficiency of read and write operations.
+The problem of database design involved evaluating both potential database platforms and implementation strategies. I took several different approaches and technologies into consideration, and ultimately selected an implementation of a "hierarchical path" column designed to balance the cost and efficiency of read and write operations.
 
 The "path" column stores a delimited string representing identifiers of all ancestor entities for each record. This approach represents a significant advantage for hierarchical queries, like retrieving all ancestors or descendants. This is possible because we can use pattern matching against the path to find related records (i.e. find all components of stage 1 by getting paths that start with /Rocket/Stage1/)
 

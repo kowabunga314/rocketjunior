@@ -47,8 +47,7 @@ class Entity(models.Model):
         super().save(*args, **kwargs)
 
     def subtree(self):
-        data = self._repr(root=True)
-        return data
+        return Entity.objects.build_tree(self.path)
 
     def _generate_name_path(self):
         # Base case
@@ -65,7 +64,7 @@ class Entity(models.Model):
         if root:
             data['parent'] = self.parent.name if self.parent is not None else None
         data['properties'] = self._get_attributes()
-        data['descendants'] = [x._repr() for x in self.descendants.all()]
+        data['descendants'] = [x._repr() for x in self.descendants.prefetch_related('descendants')]
 
         return data
 

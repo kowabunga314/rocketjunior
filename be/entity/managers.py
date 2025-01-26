@@ -1,3 +1,5 @@
+from decimal import Decimal
+from collections import defaultdict
 from django.db import models, connection, transaction
 
 
@@ -60,3 +62,67 @@ class EntityManager(models.Manager):
 
     def path_exists(self, path):
         return [d.id for d in self.filter(path=path)]
+    
+    def fetch_descendants(self, root_path):
+        with connection.cursor() as cursor:
+            query = """
+                SELECT e.id AS entity_id, 
+                    e.name AS entity_name, 
+                    e.path AS entity_path, 
+                    e.parent_id AS parent_id,
+                    a.key AS attribute_key, 
+                    a.value AS attribute_value
+                FROM entity_entity e
+                LEFT JOIN entity_attribute a ON e.id = a.entity_id
+                WHERE e.path LIKE %s
+                ORDER BY e.path
+            """
+            cursor.execute(query, [f"{root_path}%"])
+            rows = cursor.fetchall()
+        return rows
+    
+    def build_tree(self, root_path):
+        rows = self.fetch_descendants(root_path)
+
+        # Step 1: Organize entities and attributes
+        entities = {}
+        attributes = defaultdict(lambda: defaultdict(Decimal))  # Use Decimal for precision
+
+        for row in rows:
+            entity_id, name, path, parent_id, attr_key, attr_value = row
+
+            # Ensure each entity is in the dictionary
+            if entity_id not in entities:
+                entities[entity_id] = {
+                    "id": entity_id,
+                    "name": name,
+                    "path": path,
+                    "properties": {},
+                    "descendants": []
+                }
+
+            # Add attributes to the corresponding entity
+            if attr_key:
+                attributes[entity_id][attr_key] = Decimal(attr_value) if attr_value else None
+
+        # Step 2: Merge attributes into entities
+        for entity_id, props in attributes.items():
+            if entity_id in entities:
+                entities[entity_id]["properties"] = props
+
+        # Step 3: Construct the tree structure
+        tree = {}
+        e = [e for e in entities.values() if e.get('path') == '/Node.1.0']
+        for entity in entities.values():
+            if entity["path"] == root_path:  # Root node
+                tree = entity
+            else:  # Add to parent's descendants
+                parent_path = "/".join(entity["path"].split("/")[:-1])
+                parent = next(
+                    (e for e in entities.values() if e["path"] == parent_path), None
+                )
+                if parent:
+                    parent["descendants"].append(entity)
+
+        return tree
+
