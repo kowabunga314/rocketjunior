@@ -31,7 +31,7 @@ class EntitySerializer(serializers.ModelSerializer):
 class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attribute
-        fields = ['id', 'entity', 'key', 'value', 'data_type', 'created_at', 'updated_at']
+        fields = ['id', 'entity', 'key', 'value', 'created_at', 'updated_at']
 
 
 class GenericEASerializer(serializers.ModelSerializer):

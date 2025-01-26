@@ -16,6 +16,7 @@ class Entity(models.Model):
     objects = EntityManager()
 
     class Meta:
+        ordering = ['path']
         constraints = [
             models.UniqueConstraint(
                 fields=['parent', 'path'],
@@ -72,48 +73,21 @@ class Entity(models.Model):
         return f'{self.name}: {self.path}'
 
     def _get_attributes(self):
-        return {a.key: a.get_value() for a in self.attributes.all()}
+        return {a.key: a.value for a in self.attributes.all()}
 
 
 class Attribute(models.Model):
-    class DataTypeChoices(models.TextChoices):
-        """
-        DataTypeChoices Handles data type for attribute values
-
-        This class automatically handles serialization of various data types to and from string values. The class can 
-        be easily extended to support other data types.
-        """
-        STR = 'str', 'String'
-        INT = 'int', 'Integer'
-        FLT = 'flt', 'Float'
-
     entity = models.ForeignKey(to=Entity, null=False, blank=False, on_delete=models.CASCADE, related_name='attributes')
     key = models.CharField(max_length=256, null=True, blank=True)
-    value = models.CharField(max_length=256, null=True, blank=True)
-    data_type = models.CharField(max_length=3, choices=DataTypeChoices.choices, default=DataTypeChoices.STR)
+    value = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        # Parse non-string data types to strings
-        if type(self.value) is int:
-            self.data_type = self.DataTypeChoices.INT
-        elif type(self.value) is float:
-            self.data_type = self.DataTypeChoices.FLT
-        
-        super().save(*args, **kwargs)
-
-    def get_value(self):
-        # Convert non-string data types to their respective type
-        if self.data_type == self.DataTypeChoices.INT:
-            return int(self.value)
-        if self.data_type == self.DataTypeChoices.FLT:
-            return float(self.value)
-        else:
-            return self.value
+    class Meta:
+        ordering = ['id']
     
     def as_dict(self):
-        return {self.key: self.get_value()}
+        return {self.key: self.value}
     
     def __str__(self):
         return f'({self.key}: {self.value})'

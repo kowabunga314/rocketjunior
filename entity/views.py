@@ -19,7 +19,6 @@ class EntityViewSet(viewsets.ModelViewSet):
 
         if path is None:
             if parent is None:
-                print('Dealing with a root node.')
                 path = self._generate_path_root(name)
                 if len(Entity.objects.path_exists(path)) > 0:
                     return Response(
@@ -33,7 +32,6 @@ class EntityViewSet(viewsets.ModelViewSet):
                 request.data._mutable = True
                 request.data['path'] = ''
                 request.data._mutable = _mutable
-
         
         return super().create(request, *args, **kwargs)
 

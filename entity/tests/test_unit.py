@@ -62,8 +62,7 @@ class AttributeUnitTestCase(TestCase):
         attribute = Attribute.objects.create(
             entity=entity,
             key=key,
-            value=value,
-            data_type=Attribute.DataTypeChoices.FLT
+            value=value
         )
 
         self.assertIsNotNone(attribute.entity)
@@ -81,8 +80,7 @@ class AttributeUnitTestCase(TestCase):
         attribute = Attribute.objects.create(
             entity=entity,
             key=key,
-            value=value,
-            data_type=Attribute.DataTypeChoices.FLT
+            value=value
         )
         attribute_id = attribute.id
         
