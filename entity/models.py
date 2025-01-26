@@ -75,9 +75,14 @@ class Entity(models.Model):
         return {a.key: a.get_value() for a in self.attributes.all()}
 
 
-# TODO: Consider making type-specific attributes like IntegerAttribute, DecimalAttribute, or BooleanAttribute
 class Attribute(models.Model):
     class DataTypeChoices(models.TextChoices):
+        """
+        DataTypeChoices Handles data type for attribute values
+
+        This class automatically handles serialization of various data types to and from string values. The class can 
+        be easily extended to support other data types.
+        """
         STR = 'str', 'String'
         INT = 'int', 'Integer'
         FLT = 'flt', 'Float'
@@ -89,7 +94,17 @@ class Attribute(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        # Parse non-string data types to strings
+        if type(self.value) is int:
+            self.data_type = self.DataTypeChoices.INT
+        elif type(self.value) is float:
+            self.data_type = self.DataTypeChoices.FLT
+        
+        super().save(*args, **kwargs)
+
     def get_value(self):
+        # Convert non-string data types to their respective type
         if self.data_type == self.DataTypeChoices.INT:
             return int(self.value)
         if self.data_type == self.DataTypeChoices.FLT:

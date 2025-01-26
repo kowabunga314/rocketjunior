@@ -332,7 +332,8 @@ CREATE TABLE public.entity_entity (
     path character varying(2048),
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    parent_id bigint
+    parent_id bigint,
+    tree_id integer
 );
 
 
@@ -413,7 +414,7 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 --
 
 COPY public.auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) FROM stdin;
-1	pbkdf2_sha256$870000$9JAuakwQJ4Vbc1WzKHCBOI$l1k+DUFChWjYyx3TrUrBPc23GeYv3i1NUmOUD7YmKAo=	\N	t	captain			captain@foo.bar	t	t	2025-01-25 02:47:47.937+00
+1	pbkdf2_sha256$870000$KWWXiEPqI3c3vCqC3bVp4N$B+l89DSw5GebP6sd+H44pt/G8CLEz/tEKxA0gfMr3GE=	\N	t	captain			captain@foo.bar	t	t	2025-01-25 23:57:02.647632+00
 \.
 
 
@@ -462,30 +463,32 @@ COPY public.django_content_type (id, app_label, model) FROM stdin;
 --
 
 COPY public.django_migrations (id, app, name, applied) FROM stdin;
-1	contenttypes	0001_initial	2025-01-25 06:09:47.599753+00
-2	auth	0001_initial	2025-01-25 06:09:47.638579+00
-3	admin	0001_initial	2025-01-25 06:09:47.647925+00
-4	admin	0002_logentry_remove_auto_add	2025-01-25 06:09:47.651187+00
-5	admin	0003_logentry_add_action_flag_choices	2025-01-25 06:09:47.654616+00
-6	contenttypes	0002_remove_content_type_name	2025-01-25 06:09:47.661041+00
-7	auth	0002_alter_permission_name_max_length	2025-01-25 06:09:47.665219+00
-8	auth	0003_alter_user_email_max_length	2025-01-25 06:09:47.668277+00
-9	auth	0004_alter_user_username_opts	2025-01-25 06:09:47.671701+00
-10	auth	0005_alter_user_last_login_null	2025-01-25 06:09:47.674839+00
-11	auth	0006_require_contenttypes_0002	2025-01-25 06:09:47.675498+00
-12	auth	0007_alter_validators_add_error_messages	2025-01-25 06:09:47.679492+00
-13	auth	0008_alter_user_username_max_length	2025-01-25 06:09:47.68719+00
-14	auth	0009_alter_user_last_name_max_length	2025-01-25 06:09:47.691312+00
-15	auth	0010_alter_group_name_max_length	2025-01-25 06:09:47.695581+00
-16	auth	0011_update_proxy_permissions	2025-01-25 06:09:47.699469+00
-17	auth	0012_alter_user_first_name_max_length	2025-01-25 06:09:47.708554+00
-18	entity	0001_initial	2025-01-25 06:09:47.722695+00
-19	entity	0002_alter_entity_parent	2025-01-25 06:09:47.724411+00
-20	entity	0003_alter_attribute_data_type_alter_entity_name_and_more	2025-01-25 06:09:47.742316+00
-21	entity	0004_alter_entity_path	2025-01-25 06:09:47.745592+00
-22	entity	0005_alter_attribute_entity_alter_entity_name	2025-01-25 06:09:47.749112+00
-23	entity	0006_alter_attribute_data_type_alter_entity_name_and_more	2025-01-25 06:09:47.757319+00
-24	sessions	0001_initial	2025-01-25 06:09:47.764868+00
+1	contenttypes	0001_initial	2025-01-25 23:56:49.239147+00
+2	auth	0001_initial	2025-01-25 23:56:49.286487+00
+3	admin	0001_initial	2025-01-25 23:56:49.296468+00
+4	admin	0002_logentry_remove_auto_add	2025-01-25 23:56:49.299945+00
+5	admin	0003_logentry_add_action_flag_choices	2025-01-25 23:56:49.30436+00
+6	contenttypes	0002_remove_content_type_name	2025-01-25 23:56:49.311796+00
+7	auth	0002_alter_permission_name_max_length	2025-01-25 23:56:49.315585+00
+8	auth	0003_alter_user_email_max_length	2025-01-25 23:56:49.318982+00
+9	auth	0004_alter_user_username_opts	2025-01-25 23:56:49.321664+00
+10	auth	0005_alter_user_last_login_null	2025-01-25 23:56:49.324972+00
+11	auth	0006_require_contenttypes_0002	2025-01-25 23:56:49.325665+00
+12	auth	0007_alter_validators_add_error_messages	2025-01-25 23:56:49.329051+00
+13	auth	0008_alter_user_username_max_length	2025-01-25 23:56:49.334894+00
+14	auth	0009_alter_user_last_name_max_length	2025-01-25 23:56:49.339813+00
+15	auth	0010_alter_group_name_max_length	2025-01-25 23:56:49.343821+00
+16	auth	0011_update_proxy_permissions	2025-01-25 23:56:49.346922+00
+17	auth	0012_alter_user_first_name_max_length	2025-01-25 23:56:49.350504+00
+18	entity	0001_initial	2025-01-25 23:56:49.363103+00
+19	entity	0002_alter_entity_parent	2025-01-25 23:56:49.364763+00
+20	entity	0003_alter_attribute_data_type_alter_entity_name_and_more	2025-01-25 23:56:49.379038+00
+21	entity	0004_alter_entity_path	2025-01-25 23:56:49.38214+00
+22	entity	0005_alter_attribute_entity_alter_entity_name	2025-01-25 23:56:49.384972+00
+23	entity	0006_alter_attribute_data_type_alter_entity_name_and_more	2025-01-25 23:56:49.392629+00
+24	entity	0007_entity_tree_id	2025-01-25 23:56:49.397132+00
+25	entity	0008_entity_unique_parent_path	2025-01-25 23:56:49.402637+00
+26	sessions	0001_initial	2025-01-25 23:56:49.411368+00
 \.
 
 
@@ -502,16 +505,32 @@ COPY public.django_session (session_key, session_data, expire_date) FROM stdin;
 --
 
 COPY public.entity_attribute (id, key, value, data_type, created_at, updated_at, entity_id) FROM stdin;
-1	Thrust	1.622	flt	2025-01-25 05:38:26.094+00	2025-01-25 05:38:26.094+00	7
-2	ISP	15.11	flt	2025-01-25 05:38:31.547+00	2025-01-25 05:38:31.547+00	7
-3	ISP	12.551	flt	2025-01-25 05:38:38.224+00	2025-01-25 05:38:38.224+00	5
-4	Thrust	9.899	flt	2025-01-25 05:38:41.858+00	2025-01-25 05:38:41.858+00	5
-5	Thrust	9.413	flt	2025-01-25 05:38:45.494+00	2025-01-25 05:38:45.494+00	4
-6	ISP	11.632	flt	2025-01-25 05:38:49.232+00	2025-01-25 05:38:49.232+00	4
-7	ISP	12.156	flt	2025-01-25 05:38:52.486+00	2025-01-25 05:38:52.486+00	3
-8	Thrust	9.493	flt	2025-01-25 05:38:55.648+00	2025-01-25 05:38:55.648+00	3
-9	Height	18.0	flt	2025-01-25 05:39:06.461+00	2025-01-25 05:39:06.461+00	1
-10	Mass	12000.0	flt	2025-01-25 05:39:24.41+00	2025-01-25 05:39:24.41+00	1
+1	Height	18.000	str	2025-01-25 23:59:37.194646+00	2025-01-25 23:59:37.194655+00	1
+2	Mass	12000.000	str	2025-01-25 23:59:37.195636+00	2025-01-25 23:59:37.19564+00	1
+3	Thrust	9.493	str	2025-01-26 00:00:31.890757+00	2025-01-26 00:00:31.890764+00	4
+4	ISP	12.156	str	2025-01-26 00:00:31.891313+00	2025-01-26 00:00:31.891317+00	4
+5	Thrust	9.413	str	2025-01-26 00:00:53.553845+00	2025-01-26 00:00:53.553853+00	5
+6	ISP	11.632	str	2025-01-26 00:00:53.554457+00	2025-01-26 00:00:53.554462+00	5
+7	Thrust	9.899	str	2025-01-26 00:01:20.064901+00	2025-01-26 00:01:20.064909+00	6
+8	ISP	12.511	str	2025-01-26 00:01:20.065477+00	2025-01-26 00:01:20.065481+00	6
+9	Thrust	1.622	str	2025-01-26 00:37:03.707765+00	2025-01-26 00:37:03.707774+00	7
+10	ISP	15.110	str	2025-01-26 00:37:03.708414+00	2025-01-26 00:37:03.708418+00	7
+11	Thrust	9.899	str	2025-01-26 00:39:58.471486+00	2025-01-26 00:39:58.471504+00	6
+12	ISP	12.551	str	2025-01-26 00:39:58.472072+00	2025-01-26 00:39:58.472075+00	6
+13	Thrust	9.899	flt	2025-01-26 00:44:51.351234+00	2025-01-26 00:44:51.351244+00	6
+14	ISP	12.551	flt	2025-01-26 00:44:51.351824+00	2025-01-26 00:44:51.351828+00	6
+15	Thrust	9.413	flt	2025-01-26 00:45:25.557067+00	2025-01-26 00:45:25.557076+00	6
+16	ISP	11.632	flt	2025-01-26 00:45:25.557655+00	2025-01-26 00:45:25.557659+00	6
+17	Thrust	9.899	flt	2025-01-26 00:45:33.451083+00	2025-01-26 00:45:33.451091+00	6
+18	ISP	12.551	flt	2025-01-26 00:45:33.451634+00	2025-01-26 00:45:33.451639+00	6
+19	Thrust	9.413	flt	2025-01-26 00:45:40.967938+00	2025-01-26 00:45:40.967946+00	5
+20	ISP	11.632	flt	2025-01-26 00:45:40.968576+00	2025-01-26 00:45:40.96858+00	5
+21	Thrust	9.493	flt	2025-01-26 00:46:02.014468+00	2025-01-26 00:46:02.014475+00	4
+22	ISP	12.156	flt	2025-01-26 00:46:02.015058+00	2025-01-26 00:46:02.015063+00	4
+23	Thrust	1.622	flt	2025-01-26 00:46:57.928988+00	2025-01-26 00:46:57.928995+00	7
+24	ISP	15.11	flt	2025-01-26 00:46:57.929543+00	2025-01-26 00:46:57.929548+00	7
+25	Height	18.0	flt	2025-01-26 00:47:22.995346+00	2025-01-26 00:47:22.995353+00	1
+26	Mass	12000.0	flt	2025-01-26 00:47:22.995889+00	2025-01-26 00:47:22.995894+00	1
 \.
 
 
@@ -519,15 +538,14 @@ COPY public.entity_attribute (id, key, value, data_type, created_at, updated_at,
 -- Data for Name: entity_entity; Type: TABLE DATA; Schema: public; Owner: captain
 --
 
-COPY public.entity_entity (id, name, path, created_at, updated_at, parent_id) FROM stdin;
-1	Rocket	/1/	2025-01-25 01:38:20.663+00	2025-01-25 01:38:20.663+00	\N
-2	Stage1	/1/2/	2025-01-25 01:38:38.878+00	2025-01-25 01:38:38.878+00	1
-3	Engine1	/1/2/3/	2025-01-25 01:38:49.625+00	2025-01-25 01:38:49.625+00	2
-4	Engine2	/1/2/4/	2025-01-25 01:38:55.767+00	2025-01-25 02:19:45.922+00	2
-5	Engine3	/1/2/5/	2025-01-25 01:39:00.227+00	2025-01-25 02:43:44.707+00	2
-6	Stage2	/1/6/	2025-01-25 01:39:09.303+00	2025-01-25 01:39:09.303+00	1
-7	Engine1	/1/6/7/	2025-01-25 01:39:22.155+00	2025-01-25 01:39:22.155+00	6
-8	Turbopump3	/1/2/5/8/	2025-01-25 02:20:14.017+00	2025-01-25 02:20:14.017+00	5
+COPY public.entity_entity (id, name, path, created_at, updated_at, parent_id, tree_id) FROM stdin;
+1	Rocket	/Rocket	2025-01-25 23:59:01.131855+00	2025-01-25 23:59:01.134219+00	\N	1
+2	Stage1	/Rocket/Stage1	2025-01-25 23:59:46.299877+00	2025-01-25 23:59:46.301046+00	1	1
+3	Stage2	/Rocket/Stage2	2025-01-25 23:59:49.070278+00	2025-01-25 23:59:49.071387+00	1	1
+4	Engine1	/Rocket/Stage1/Engine1	2025-01-25 23:59:54.775114+00	2025-01-25 23:59:54.776721+00	2	1
+5	Engine2	/Rocket/Stage1/Engine2	2025-01-26 00:00:36.346917+00	2025-01-26 00:00:36.348013+00	2	1
+6	Engine3	/Rocket/Stage1/Engine3	2025-01-26 00:01:03.581524+00	2025-01-26 00:01:03.58273+00	2	1
+7	Engine1	/Rocket/Stage2/Engine1	2025-01-26 00:36:42.538119+00	2025-01-26 00:36:42.539721+00	3	1
 \.
 
 
@@ -591,21 +609,21 @@ SELECT pg_catalog.setval('public.django_content_type_id_seq', 8, true);
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: captain
 --
 
-SELECT pg_catalog.setval('public.django_migrations_id_seq', 24, true);
+SELECT pg_catalog.setval('public.django_migrations_id_seq', 26, true);
 
 
 --
 -- Name: entity_attribute_id_seq; Type: SEQUENCE SET; Schema: public; Owner: captain
 --
 
-SELECT pg_catalog.setval('public.entity_attribute_id_seq', 10, true);
+SELECT pg_catalog.setval('public.entity_attribute_id_seq', 26, true);
 
 
 --
 -- Name: entity_entity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: captain
 --
 
-SELECT pg_catalog.setval('public.entity_entity_id_seq', 8, true);
+SELECT pg_catalog.setval('public.entity_entity_id_seq', 7, true);
 
 
 --
@@ -863,6 +881,13 @@ CREATE INDEX entity_attribute_entity_id_c2725f67 ON public.entity_attribute USIN
 --
 
 CREATE INDEX entity_entity_parent_id_5487733c ON public.entity_entity USING btree (parent_id);
+
+
+--
+-- Name: unique_parent_path; Type: INDEX; Schema: public; Owner: captain
+--
+
+CREATE UNIQUE INDEX unique_parent_path ON public.entity_entity USING btree (parent_id, path) WHERE ((parent_id IS NOT NULL) AND (path IS NOT NULL));
 
 
 --

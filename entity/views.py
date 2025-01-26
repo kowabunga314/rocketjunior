@@ -54,8 +54,8 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
     serializer_class = GenericEASerializer
 
     def get(self, request, *args, **kwargs):
-        full_path = '/' + kwargs.get('path')
-        print('\nfull_path: ', full_path)
+        # Get path and eliminate trailing slash if present
+        full_path = '/' + kwargs.get('path').strip('/')
         try:
             entity = Entity.objects.get(path=full_path)
             return Response(entity.subtree(), status=status.HTTP_200_OK)
@@ -70,7 +70,9 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
         parent_path = '/' + '/'.join(path_parts[:-1]) if len(path_parts) > 1 else None
 
         # Get parent entity if exists
-        parent_entity = Entity.objects.get_or_none(path=parent_path)
+        parent_entity = None
+        if parent_path:
+            parent_entity = Entity.objects.get(path=parent_path)
 
         # Pass request data to serializer
         serializer_data = request.data
