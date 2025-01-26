@@ -34,7 +34,6 @@ class EntitySerializer(serializers.ModelSerializer):
 class RoundingDecimalField(serializers.DecimalField):
     """Automatically rounds decimals to model's original value"""
     def validate_precision(self, value):
-        print('value: ', value)
         # This is needed to avoid to raise an error if `value` has more decimals than self.decimal_places.
         with localcontext() as ctx:
             if self.rounding:
@@ -90,7 +89,7 @@ class GenericEASerializer(serializers.ModelSerializer):
         entity = Entity.objects.get(path=path)
         # Create attribute for each key/value pair provided
         with transaction.atomic():
-            for key, value in context.get('attributes').items():
+            for key, value in dynamic_dict.items():
                 attribute_queryset = Attribute.objects.filter(entity=entity, key=key)
                 if not attribute_queryset.exists():
                     Attribute.objects.create(

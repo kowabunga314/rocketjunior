@@ -1,3 +1,5 @@
+import json
+from decimal import Decimal
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -17,9 +19,9 @@ class SimpleUseViewSetTestCase(APITestCase):
         engine3 = Entity.objects.create(name='Engine3', parent=self.stage1)
         turbopump1 = Entity.objects.create(name='Turbopump1', parent=self.engine1)
         # Create a few attributes
-        thrust = 9.493
-        isp = 12.156
-        mass = 175.000
+        thrust = Decimal('9.493')
+        isp = Decimal('12.156')
+        mass = Decimal('175.000')
         Attribute.objects.create(entity=self.engine1, key='Thrust', value=thrust)
         Attribute.objects.create(entity=self.engine1, key='ISP', value=isp)
         Attribute.objects.create(entity=turbopump1, key='Mass', value=mass)
@@ -92,14 +94,16 @@ class SimpleUseViewSetTestCase(APITestCase):
 
     def test_add_attribute_to_entity(self):
         # Test creating attributes for an existing entity
+        e = Entity.objects.get(path=self.engine1.path)
         url = reverse('simple-use-api', kwargs={'path': 'Rocket/Stage1/Engine1'})
-        thrust = '9.493'
-        isp = '12.156'
+        thrust = Decimal('9.493')
+        isp = Decimal('12.156')
         payload = {
-            'Thrust': thrust,
-            'ISP': isp
+            "Thrust": str(thrust),
+            "ISP": str(isp)
         }
-        response = self.client.post(url, payload)
+        response = self.client.post(url, json.dumps(payload), content_type='application/json')
+        e.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Verify the attributes were created

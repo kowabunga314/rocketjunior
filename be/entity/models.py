@@ -65,7 +65,6 @@ class Entity(models.Model):
         if root:
             data['parent'] = self.parent.name if self.parent is not None else None
         data['properties'] = self._get_attributes()
-        print('properties: ', data['properties'])
         data['descendants'] = [x._repr() for x in self.descendants.all()]
 
         return data
@@ -74,8 +73,6 @@ class Entity(models.Model):
         return f'{self.name}: {self.path}'
 
     def _get_attributes(self):
-        for a in self.attributes.all():
-            print('a.get_value(): ', a.get_value())
         return {a.key: a.get_value() for a in self.attributes.all()}
 
 

@@ -168,7 +168,7 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
                 return Response({'message': 'Entity parent does not exist.'}, status.HTTP_404_NOT_FOUND)
 
         # Pass request data to serializer
-        attributes = self._parse_attribute_body(request.body)
+        # attributes = self._parse_attribute_body(request.body)
         serializer_data = request.data
         serializer = GenericEASerializer(
             data=serializer_data,
@@ -176,7 +176,7 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
                 'path': full_path,
                 'entity_name': entity_name,
                 'parent_entity': parent_entity,
-                'attributes': attributes
+                # 'attributes': attributes
             }
         )
         # Validate request data and return response
@@ -190,6 +190,5 @@ class SimpleUseViewSet(viewsets.ModelViewSet):
         pattern = r'"([^"]+)":\s*([^,}]+)'
         matches = re.findall(pattern, str(body).replace('\\n', ''))
         attributes = {i[0]: Decimal(i[1]) for i in matches}
-        print('attributes: ', attributes)
         return attributes
 
