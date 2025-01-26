@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Hint: Ensure that docker, docker-compose, and direnv are installed
 echo "Checking dependencies..."
-for cmd in docker docker-compose direnv; do
+for cmd in docker direnv; do
   if ! command -v $cmd &> /dev/null; then
     echo -e "\033[31m $cmd is not installed. Please install it before proceeding.\033[0m"
     echo "Examples:"
@@ -14,12 +14,9 @@ for cmd in docker docker-compose direnv; do
 done
 
 echo "Allowing direnv..."
-cd be
+cd be || exit
 direnv allow || { echo "Failed to allow direnv. Ensure direnv is installed and configured."; exit 1; }
 cd ..
-
-echo "Making scripts executable..."
-chmod +x *.sh
 
 echo ""
 echo "===================================================="

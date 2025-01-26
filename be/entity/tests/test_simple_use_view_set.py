@@ -131,3 +131,31 @@ class SimpleUseViewSetTestCase(APITestCase):
 
         # Verify no attributes were created
         self.assertFalse(Attribute.objects.filter(entity=self.stage1).exists())
+
+    def test_toggle_attribute_return_type(self):
+        # Create attributes for Engine1
+        thrust = Decimal(5.50)
+        isp = Decimal(300)
+        Attribute.objects.create(entity=self.engine1, key='Thrust', value=thrust)
+        Attribute.objects.create(entity=self.engine1, key='ISP', value=isp)
+        self.engine1.refresh_from_db()
+
+        # Get subtree data from API without precision flag
+        url = reverse('simple-use-api', kwargs={'path': 'Rocket/Stage1/Engine1'})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the attributes' values are returned as floats
+        properties = response.data.get('properties')
+        self.assertEqual(properties.get('Thrust'), float(thrust))
+        self.assertEqual(properties.get('ISP'), float(isp))
+
+        # Get subtree data from API with precision flag
+        url = reverse('simple-use-api', kwargs={'path': 'Rocket/Stage1/Engine1'})
+        response = self.client.get(url, query_params={'precise': 'true'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the attributes' values are returned as strings
+        properties = response.data.get('properties')
+        self.assertEqual(properties.get('Thrust'), str(thrust))
+        self.assertEqual(properties.get('ISP'), str(isp))
