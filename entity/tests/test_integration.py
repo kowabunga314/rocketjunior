@@ -5,6 +5,7 @@ from unittest import skip
 
 from entity.models import Attribute, Entity
 
+
 class EntityViewSetTestCase(APITestCase):
     def setUp(self):
         # Create test entities
@@ -167,11 +168,11 @@ class AttributeViewSetTestCase(APITestCase):
     def _create_user(self):
         from django.contrib.auth.models import User
         return User.objects.create_user(username="testuser", password="password")
-    
+
     @skip
     def test_get_entity_with_attributes(self):
         """Test that the detail endpoint returns the correct entity attributes."""
-        detail_url = reverse('entity-detail', args=[self.stage1engine1.id]) 
+        detail_url = reverse('entity-detail', args=[self.stage1engine1.id])
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('name'), self.stage1engine1.name)

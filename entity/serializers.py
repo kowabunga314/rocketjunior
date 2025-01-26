@@ -16,12 +16,12 @@ class EntitySerializer(serializers.ModelSerializer):
         if '/' in value:
             raise ValidationError('Entity names cannot contain \'/\' (forward slash).')
         return value
-    
+
     def update(self, instance, validated_data):
         # Update the instance with the validated data
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        
+
         # Save the instance explicitly to trigger the post_save signal
         instance.save()
 
@@ -48,7 +48,7 @@ class GenericEASerializer(serializers.ModelSerializer):
         if dynamic_fields:
             validated_data['dynamic_dict'] = dynamic_fields
         return validated_data
-    
+
     def create(self, validated_data):
         # Get dynamic_dict
         dynamic_dict = validated_data.get('dynamic_dict', {})
@@ -57,20 +57,20 @@ class GenericEASerializer(serializers.ModelSerializer):
             return self._handle_create_entity(self.context)
         # Create attribute if payload
         return self._handle_create_attribute(dynamic_dict, self.context)
-    
+
     def _handle_create_entity(self, context):
         name = self.context.get('entity_name')
         parent = self.context.get('parent_entity')
         with transaction.atomic():
             entity = Entity.objects.create(parent=parent, name=name)
         return entity.subtree()
-    
+
     def _handle_create_attribute(self, dynamic_dict, context):
         path = context.get('path')
         entity = Entity.objects.get(path=path)
         # Create attribute for each key/value pair provided
         with transaction.atomic():
-            for key,value in dynamic_dict.items():
+            for key, value in dynamic_dict.items():
                 Attribute.objects.create(
                     entity=entity,
                     key=key,
@@ -78,4 +78,3 @@ class GenericEASerializer(serializers.ModelSerializer):
                 )
         entity.refresh_from_db()
         return entity.subtree()
-        

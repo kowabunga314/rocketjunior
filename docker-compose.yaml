@@ -18,7 +18,7 @@ services:
     ports:
       - 6379:6379
   api: &api_base
-    build: 
+    build:
       context: ./
       dockerfile: ./Dockerfile
     restart: always
@@ -35,7 +35,7 @@ services:
       - ./:/app
     depends_on:
       - db
-  migrations: 
+  migrations:
     <<: *api_base
     restart: 'no'
     command: python manage.py migrate

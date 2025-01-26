@@ -1,5 +1,4 @@
-from decouple import config
-from django.db import models, transaction
+from django.db import models
 from rest_framework.exceptions import ValidationError
 
 from entity.managers import EntityManager
@@ -36,8 +35,8 @@ class Entity(models.Model):
                 raise ValidationError({
                     'ValidationError': {
                         'message': f'Entity path is not unique: {self.path}',
-                        'hint': 'If this is a root node, its name must be unique among root nodes. If this is a '\
-                            'descendant node, its name must be unique among its siblings'
+                        'hint': 'If this is a root node, its name must be unique among root nodes. If this is a '
+                                'descendant node, its name must be unique among its siblings'
                     }
                 })
         # Update child paths
@@ -49,14 +48,14 @@ class Entity(models.Model):
     def subtree(self):
         data = self._repr(root=True)
         return data
-    
+
     def _generate_name_path(self):
         # Base case
         if self.parent is None:
             return f'/{self.name}'
         # Return parent path with self.name appended
         return f'{self.parent.path}/{self.name}'
-    
+
     def _repr(self, root=False):
         data = {}
         data['id'] = self.id
@@ -68,7 +67,7 @@ class Entity(models.Model):
         data['descendants'] = [x._repr() for x in self.descendants.all()]
 
         return data
-    
+
     def __str__(self):
         return f'{self.name}: {self.path}'
 
@@ -85,9 +84,9 @@ class Attribute(models.Model):
 
     class Meta:
         ordering = ['id']
-    
+
     def as_dict(self):
         return {self.key: self.value}
-    
+
     def __str__(self):
         return f'({self.key}: {self.value})'

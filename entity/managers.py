@@ -1,5 +1,6 @@
 from django.db import models, connection, transaction
 
+
 class EntityManager(models.Manager):
     def update_child_paths(self, old_path, parent_path):
         """
@@ -39,11 +40,11 @@ class EntityManager(models.Manager):
                         """,
                         [new_path, child_id],
                     )
-        
+
     def update_child_trees(self, path, tree_id):
         if not path or not tree_id:
             raise ValueError('path and tree_id required.')
-        
+
         with transaction.atomic():
             descendant_entities = self.select_for_update().filter(
                 path__startswith=path
@@ -57,7 +58,5 @@ class EntityManager(models.Manager):
             # Perform the bulk update
             self.bulk_update(descendant_entities, ['tree_id'])
 
-
-    
     def path_exists(self, path):
         return [d.id for d in self.filter(path=path)]

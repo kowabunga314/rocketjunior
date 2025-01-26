@@ -12,6 +12,13 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name='entity',
-            constraint=models.UniqueConstraint(condition=models.Q(('parent__isnull', False), ('path__isnull', False)), fields=('parent', 'path'), name='unique_parent_path'),
+            constraint=models.UniqueConstraint(
+                condition=models.Q(
+                    ('parent__isnull', False),
+                    ('path__isnull', False)
+                ),
+                fields=('parent', 'path'),
+                name='unique_parent_path'
+            ),
         ),
     ]

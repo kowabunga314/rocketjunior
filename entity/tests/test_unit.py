@@ -1,7 +1,7 @@
 from django.test import TestCase
-from rest_framework.exceptions import ValidationError
 
 from entity.models import Attribute, Entity
+
 
 class EntityUnitTestCase(TestCase):
     def test_entity_creation(self):
@@ -14,7 +14,7 @@ class EntityUnitTestCase(TestCase):
         self.assertIsNotNone(entity.path)
         self.assertEqual(entity.path, f'/{entity.name}')
         self.assertIsNone(entity.parent)
-    
+
     def test_entity_parent_relationship(self):
         parent_name = "Parent Entity"
         child_name = "Child Entity"
@@ -38,7 +38,7 @@ class EntityUnitTestCase(TestCase):
         parent.parent = child
         # with self.assertRaises(ValidationError):
         parent.save()
-    
+
     def test_entity_delete_set_null(self):
         parent_name = "Parent Entity"
         child_name = "Child Entity"
@@ -83,10 +83,10 @@ class AttributeUnitTestCase(TestCase):
             value=value
         )
         attribute_id = attribute.id
-        
+
         self.assertIsNotNone(attribute.entity)
         self.assertEqual(attribute.entity.id, entity.id)
-        
+
         entity.delete()
 
         self.assertEqual(
@@ -98,4 +98,3 @@ class AttributeUnitTestCase(TestCase):
             Attribute.objects.filter(id=attribute_id).count(),
             0
         )
-

@@ -32,14 +32,14 @@ class EntityViewSet(viewsets.ModelViewSet):
                 request.data._mutable = True
                 request.data['path'] = ''
                 request.data._mutable = _mutable
-        
+
         return super().create(request, *args, **kwargs)
 
     @action(detail=True, methods=['GET'])
     def subtree(self, request, pk=None):
         root_entity = get_object_or_404(Entity, pk=pk)
         return Response(root_entity.subtree())
-    
+
     def _generate_path_root(self, name):
         return f'/{name}'
 

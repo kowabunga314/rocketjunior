@@ -15,11 +15,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='attribute',
             name='entity',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attributes', to='entity.entity'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='attributes',
+                to='entity.entity'
+            ),
         ),
         migrations.AlterField(
             model_name='entity',
             name='name',
-            field=models.CharField(max_length=256, unique=True, validators=[django.core.validators.RegexValidator('[/]', inverse_match=True)]),
+            field=models.CharField(
+                max_length=256,
+                unique=True,
+                validators=[django.core.validators.RegexValidator('[/]', inverse_match=True)]
+            ),
         ),
     ]
