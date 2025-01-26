@@ -1,5 +1,9 @@
 # rocketjunior
-System for organizational hierarchy of hardware.
+A REST-based application for management of organizational hierarchy of hardware.
+
+Author: Dylan Frost
+
+Interviewing for Senior Ground Software Engineer II
 
 
 # Starting
@@ -8,17 +12,25 @@ Execute the file `setup.sh` to configure local environment:
 
 ```make init```
 
+> Note: This step is not required if you already have docker and docker compose set up.
+
 ### Running
 Run `make build` to build and start the local environment.
 
 ### Using
 1. Access the Swagger UI on [your local machine](http://localhost:8000/api/v1/swagger-ui/)
-
 2. Authenticate to the Swagger UI using the credentials provided with this submission.
+3. Try out the default endpoints with the provided graphical HTTP client.
 
 To show all API endpoints in Swagger including the model extension endpoints, set  `HIDE_API_EXTENSIONS=false` in `./be/.envrc`.
 
 Run tests with ```make test```
+
+### Troubleshooting
+* Make sure that Docker is installed properly on the local machine
+* Check for other running containers that might be using the same ports
+* If you are having trouble with Makefile commands, check the Makefile to see what commands it is executing and try running them manually
+* For help with this application, please reach out to Dylan Frost at dougfrost314@gmail.com
 
 # Introduction
 The interview process for Senior Ground Software Engineer at Rocket Lab asks candidates to complete a coding project to prove their proficiency. I was asked to choose either a backend or frontend problem to solve, this project focuses on the backend side of the two challenges offered.
@@ -94,6 +106,9 @@ I believe that this is an acceptable trade-off. JSON is an industry standard and
 
 The floating-point limitation could have been mitigated by choosing a technology like GraphQL to retrieve information from the database. This approach would have worked well if I had chosen to use a graph database.
 
+## Local Development Environment
+I spent a lot of time thinking about how to balance ease of setup of this application for evaluators with the need to create a secure and robust application. During most of this project's development, it utilized `direnv` and `python-decouple` to inject sensitive information from a git-ignored `.env` file. I prefer this approach over using operating system environment variables because it has better support for error handling than pulling the values from the operating system. Ultimately, I chose to remove `direnv` and `python-decouple` to eliminate unnecessary complexity for others who want to run this application. The values being passed in the `.env` file are not sensitive because they only apply to the local environment.
+
 
 # Production-Readiness
 ## Production Infrastructure
@@ -102,6 +117,7 @@ This project is designed to be deployed to the cloud using Kubernetes. Using con
 ### Summary of Infrastructure
 * Containerized application
 * Container images contain application in a highly specific environment
+* Containers are hosted on a Kubernetes node using services like AWS EKS
 * Some services that reside in containers locally can be run directly from cloud services, such as:
   * Database: AWS RDS
     * Backups
@@ -116,12 +132,17 @@ This project is designed to be deployed to the cloud using Kubernetes. Using con
 * Use CI/CD tool like GitHub Actions to orchestrate testing, validation, and deployment of application
   * Workflows and automations can be controlled manually or be event-driven
   * Likely setup: automatic test and validation runs when a pull request is created, automatic deploys to test environments after pull requests merged, automatic deploys to production when a release tag is created
+* Infrastructure-as-code tools such as Terraform can be used to manage the build, composition, and state of cloud resources
 
 ## Secret Handling
 Secret handling during deployments is a major concern regarding application security. This project uses an extremely thin environment file (which wasn't strictly necessary because its contents are not particulary sensitive) as a kind of stand-in for more robust secret handling. In a production deployment, sensitive data can be injected into the deployment using a service like GitHub Secrets or AWS Secrets Manager. This approach provides a centralized control for all secrets ensures that sensitive data remains encrypted in transit to the application.
 
 ## CI/CD & Automated Testing
-CI/CD is critical to the success of an enterprise-level application...
+CI/CD is critical to the success of an enterprise-level application, speeding up the development lifecycle with automation covering builds, tests, and deployments. GitHub Actions is a perfect candidate to handle CI/CD for applications being hosted in GitHub repositories. Some advantages of using GitHub Workflows:
+* Workflows and actions can be easily packaged and shared between projects
+* Automations can be highly modular to enable a high rate of reuse for components
+* Automations are defined and stored as code in a project's repository, ensuring their behavior only changes when it needs to
+* Processes can be started by a wide variety of events in a GitHub repository, or even from outside of the repository
 
 ## Authentication
 This project retains the default Basic Auth configuration that all new Django projects start with. I would like to have removed this functionality from the project, knowing that it will only ever run as a demo on personal devices with no sensitive information being stored within it. I made the decision to leave authentication in place because part of this project is to explore how an application like this would be deployed to a production environment. If this application needed to be prepared for release, I would get to work on replacing Basic Auth with JWTs for a more secure application that is prepared to support more advanced authentication schemes like OAuth.

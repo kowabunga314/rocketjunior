@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-from decouple import config
 import dj_database_url
 from pathlib import Path
 
