@@ -34,10 +34,23 @@ services:
       - ./be:/app
     depends_on:
       - db
+      - redis
   migrations:
     <<: *api_base
     restart: 'no'
     command: python manage.py migrate
     ports: []
+  fe:
+    build:
+      context: ./fe
+      dockerfile: ./Dockerfile
+    restart: always
+    working_dir: /app
+    command: npm start
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+      - api
 volumes:
   pgdata:
