@@ -46,11 +46,18 @@ services:
       dockerfile: ./Dockerfile
     restart: always
     working_dir: /app
-    command: npm start
+    command: yarn start
     ports:
       - 3000:3000
     depends_on:
       - db
       - api
+    volumes:
+      - ./fe:/app # Sync local files with Docker container
+      - /app/node_modules # Prevents node_modules from syncing with your local machine
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Ensures hot reload works inside Docker
+    stdin_open: true
+    tty: true
 volumes:
   pgdata:
