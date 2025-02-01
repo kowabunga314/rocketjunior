@@ -1,6 +1,7 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import Tree from './Tree';
+import Tree from './components/Tree';
 
 // Example data
 const sampleData = [
@@ -61,7 +62,7 @@ const sampleData = [
 function App() {
   return (
     <div className='App'>
-      <h1>Tree Visualization WUMBO</h1>
+      <h1>Tree Visualization</h1>
       <Tree data={sampleData} />
     </div>
   );
