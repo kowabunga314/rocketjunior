@@ -3,7 +3,7 @@ import TreeNode from './TreeNode';
 
 const Tree = ({ data }) => {
   return (
-    <div className='container mt-4 border border-primary rounded-2'>
+    <div className='container mt-4'>
       {data.map((node) => (
         <TreeNode key={node.id} node={node} depth={0} />
       ))}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const TimeSince = ({ timestamp }) => {
   return (
-    <div className='pl-4 d-flex justify-content-start'>Created {getTimeSince(timestamp)}</div>
+    <div className='pl-4 d-flex justify-content-start font-weight-light text-muted'>Created {getTimeSince(timestamp)}</div>
   )
 };
 
