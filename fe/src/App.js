@@ -9,18 +9,21 @@ const sampleData = [
     id: 1,
     name: 'Rocket',
     path: '/Rocket',
+    created_at: '2025-01-25T23:59:01.131855Z',
     properties: { Mass: '12000.000', Height: '18.000' },
     descendants: [
       {
         id: 2,
         name: 'Stage1',
         path: '/Rocket/Stage1',
+        created_at: '2025-01-25T23:59:01.131855Z',
         properties: {},
         descendants: [
           {
             id: 4,
             name: 'Engine1',
             path: '/Rocket/Stage1/Engine1',
+            created_at: '2025-01-31T23:59:01.131855Z',
             properties: { ISP: '12.156', Thrust: '9.493' },
             descendants: []
           },
@@ -28,6 +31,7 @@ const sampleData = [
             id: 5,
             name: 'Engine2',
             path: '/Rocket/Stage1/Engine2',
+            created_at: '2025-02-01T19:59:01.131855Z',
             properties: { ISP: '11.632', Thrust: '9.413' },
             descendants: []
           },
@@ -35,6 +39,7 @@ const sampleData = [
             id: 6,
             name: 'Engine3',
             path: '/Rocket/Stage1/Engine3',
+            created_at: '2025-01-30T23:59:01.131855Z',
             properties: { ISP: '12.551', Thrust: '9.899' },
             descendants: []
           }
@@ -44,12 +49,14 @@ const sampleData = [
         id: 7,
         name: 'Stage2',
         path: '/Rocket/Stage2',
+        created_at: '2000-01-25T23:59:01.131855Z',
         properties: {},
         descendants: [
           {
             id: 8,
             name: 'Engine1',
             path: '/Rocket/Stage2/Engine1',
+            created_at: '2022-01-25T23:59:01.131855Z',
             properties: { ISP: '15.110', Thrust: '1.622' },
             descendants: []
           }

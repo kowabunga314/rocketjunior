@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types'
 import Property from './Property'
+import TimeSince from './TimeSince'
 
 const TreeNode = ({ node, depth }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -8,7 +9,7 @@ const TreeNode = ({ node, depth }) => {
   const toggleCollapse = () => { setIsCollapsed(!isCollapsed); }
 
   return (
-    <div style={{ marginLeft: depth * 20 + 'px' }} className="mb-2">
+    <div style={{ marginLeft: depth * 20 + 'px' }} className="mb-2 border border-secondary rounded-2 ">
       <div 
         onClick={toggleCollapse}
         style={{ cursor: 'pointer', fontWeight: 'bold' }}
@@ -17,8 +18,10 @@ const TreeNode = ({ node, depth }) => {
         {isCollapsed ? '▶' : '▼'} {node.name}
       </div>
 
+      <TimeSince timestamp={node.created_at} />
+
       {/* Render properties if any */}
-      <div className='ml-4'>
+      <div className='ml-4 p-2 border border-warning rounded-2'>
         {Object.entries(node.properties).map(([key, value]) => (
           <Property key={key} propKey={key} propValue={value} />
         ))}
