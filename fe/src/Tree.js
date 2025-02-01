@@ -1,10 +1,9 @@
-// src/Tree.js
 import React, { useState } from 'react';
 
 const TreeNode = ({ node, depth }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed)
+    setIsCollapsed(!isCollapsed);
   }
   return (
     <div style={{ marginLeft: depth * 20 + 'px' }}>
