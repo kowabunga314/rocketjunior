@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types'
+
+import DeleteButton from './DeleteButton';
 import Property from './Property'
 import TimeSince from './TimeSince'
 
-const TreeNode = ({ node, depth }) => {
+const TreeNode = ({ node, depth, onDelete }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleCollapse = () => { setIsCollapsed(!isCollapsed); }
@@ -19,8 +21,9 @@ const TreeNode = ({ node, depth }) => {
       </div>
 
 
-      <div className='ml-4 p-2'>
+      <div className='ml-4 p-2 d-flex flex-row justify-content-between'>
         <TimeSince timestamp={node.created_at} />
+        <DeleteButton onDelete={() => onDelete(node.id)} />
       </div>
 
       {/* Render properties if any */}
@@ -34,7 +37,7 @@ const TreeNode = ({ node, depth }) => {
       {!isCollapsed && node.descendants && node.descendants.length > 0 && (
         <div>
           {node.descendants.map((descendant) => (
-            <TreeNode key={descendant.id} node={descendant} depth={depth + 1} />
+            <TreeNode key={descendant.id} node={descendant} depth={depth + 1} onDelete={() => onDelete(descendant.id)} />
           ))}
         </div>
       )}
