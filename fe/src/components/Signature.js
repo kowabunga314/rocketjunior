@@ -1,5 +1,4 @@
 import React from 'react';
-// import './Signature.css';  // We'll add styles here
 
 const Signature = () => {
   return (

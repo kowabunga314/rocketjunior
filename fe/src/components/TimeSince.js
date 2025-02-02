@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+const showOriginalTimestamp = false;
 
 const TimeSince = ({ timestamp }) => {
+  const [showOriginalTimestamp, setShowOriginalTimestamp] = useState(false)
+  const localeString = showOriginalTimestamp ? ` (${new Date(timestamp).toLocaleString()})` : ''
+  const toggleShowOriginalTimestamp = () => setShowOriginalTimestamp(!showOriginalTimestamp)
+
   return (
-    <div className='pl-4 d-flex justify-content-start font-weight-light text-muted'>Created {getTimeSince(timestamp)}</div>
+    <div
+      className='pl-4 d-flex justify-content-start font-weight-light text-muted'
+      style={{ cursor: 'pointer' }}
+      onClick={toggleShowOriginalTimestamp}
+    >
+      Created {getTimeSince(timestamp)}{localeString}
+    </div>
   )
 };
 

@@ -18,15 +18,16 @@ Execute the file `setup.sh` to configure local environment:
 Run `make build` to build and start the local environment.
 
 ### Using
-1. Access the Swagger UI on [your local machine](http://localhost:8000/api/v1/swagger-ui/)
-2. Authenticate to the Swagger UI using the credentials provided with this submission.
-3. Try out the default endpoints with the provided graphical HTTP client.
+1. Access the frontend application on [your local machine](http://localhost:3000)
+2. Access the Swagger UI on [your local machine](http://localhost:8000/api/v1/swagger-ui/)
+3. Authenticate to the Swagger UI using the credentials provided with this submission.
+4. Try out the default endpoints with the provided graphical HTTP client.
 
 To show all API endpoints in Swagger including the model extension endpoints, set  `HIDE_API_EXTENSIONS=false` in `./be/.envrc`.
 
-Run tests with ```make test```
+Run backend API tests with ```make test-be```
 
-Run frontend tests with ```docker compose exec -e REACT_APP_API_URL=http://json-server:3001 fe yarn test ```
+Run frontend app tests with ```make test-fe ```
 
 ### Troubleshooting
 * Make sure that Docker is installed properly on the local machine
@@ -38,6 +39,16 @@ Run frontend tests with ```docker compose exec -e REACT_APP_API_URL=http://json-
 The interview process for Senior Ground Software Engineer at Rocket Lab asks candidates to complete a coding project to prove their proficiency. I was asked to choose either a backend or frontend problem to solve, this project focuses on the backend side of the two challenges offered.
 
 The tasks laid out for this challenge:
+- Design a new React application that
+  - Allows users to search for a node by its path using a text input
+  - Sends search queries to an API after each keypress and debounce in-flight requests
+  - Displays a node tree with properties and time since created
+  - Displays property values in green when they are in excess of 10
+  - Implements a reusable browser-native confirmation dialog
+  - Implements a "Delete" button using the confirmation component to delete a node
+    - Delete function is not to be connected to an API
+  - Implements a helper method to display created times as "time since created"
+  - Has unit tests to assert that the color of node properties is rendered correctly
 - Design a database to support deeply-nested self-referential node relationships and arbitrary assignment of key/value pairs to nodes
   - The path of a node can be inferred from its hierarchy
   - There are no name requirements on descendant nodes
@@ -79,8 +90,11 @@ I chose to use the Django ORM for this project because models can be quickly spu
 ## Docker & Docker Compose
 Selecting Docker and Docker Compose to support this project was an easy choice. Containerization offers many advantages that make developing and deploying code much easier. The biggest factor in this selection were the fact that this project is intended to run on an evaluator's local machine. Using containers to support the application ensures that it will be using the exact same runtime that it did during development. The other important advantage that I had in mind when making this selection is that containerization is the first step to deploying an application with Kubernetes. This idea is discussed more in the **Production-Readiness** section.
 
+## Frontend Framework - React
+Most of my experience using frontend frameworks has been with Vue. I chose to use React for this project because of the two framework choices available, I did have a little bit of experience and the framework seemed to have more in common with Vue. While the frameworks do feel substantially different to use, many of the same design prinicples apply, such as state management and responsiveness of components. I think that React was a good choice for this project, and that I would be able to quickly get comfortable with using the framework day-to-day.
+
 # Key Challenges
-## Balancing Efficiency of Read and Write Operations
+## Balancing Efficiency of Read and Write Database Operations
 Without being able to learn more about this project's business requirements, I wanted to choose an approach that would balance efficiency of read and write operations to produce a solution that will be suitable for a wide variety of use cases. The hierarchical path approach that I selected can enable extremely fast reads of these complex relationships, but this performance is not accessible to projects that only make use of ORMs. In order to really take advantage of the performance potential of this design, I created a raw SQL query to efficiently fetch a flat dataset of all nodes in a tree, and a tree builder method to restructure this data into a tree using Python dictionaries.
 
 With the raw sql approach, the API took roughly 300 milliseconds to produce a tree from over 40,000 records. To see this performance in action, take a look at the load test in `be/entity/test/test_stress.py`
@@ -96,10 +110,18 @@ I wanted to add update and delete capabilities to this API as well. You may have
 ## Decimal Precision of Property Values
 JSON does not support trailing-zero precision of decimal values. In the likely scenario that this application's clients would be other software applications, string values would be used to transmit decimal properties, which would then be converted back into decimal values by the endpoint's consumer. This is a known limitation of JSON and is a fairly common workaround. I added the optional `precision` query parameter to my API endpoints to allow clients to select whether they want to receive truncated decimal values or string values with preserved precision.
 
+## Using React
+This is my first real project using React. I have practiced with it a few times in the past, but have never created a fully-fledged applicaiton with it. I have a lot of experience using Vue2, and I did expect the framework to enforce a little bit more structure in the application. Vue codebases feel very organized, and each component typically has its content laid out inside of an object that makes it very easy to separate out different parts of a given component into logical sections. This change was not very difficult to adjust to, and I found that by the end of this project, I felt somewhat fluent with the React basics.
 
 # Caveats
 ## Expensive Writes
-Updating entities can cause somewhat expensive write operations. Create operations are cheap, but updates can require changes to many records if the node being updated has many descendants. While this expense cannot be eliminated entirely, it can be greatly reduced by 
+Updating entities can cause somewhat expensive write operations. Create operations are cheap, but updates can require changes to many records if the node being updated has many descendants. While this expense cannot be eliminated entirely, it can be greatly reduced by using a path, tree ID, or combination of the two.
+- Tree ID: a reference to the root node of a tree
+  - Easy and inexpensive to maintain for a given node
+  - Can be used to quickly filter records down to an individual tree
+- Path: a slash-delimited string listing all nodes from root to current node
+  - Allows fast updates of child nodes when moving a parent node by performing an in-place substring replacement operation to update the ancestor portion of a node's path
+
 
 ## Decimal Precision in JSON Payloads
 In JSON, decimal values are represented as floating-point numbers, and as a result do not natively support formatting of decimals to retain decimal precision in transit. This limitation can be worked around by passing decimal values as strings to retain their original precision. Because the project prompt specified decimals with trailing-zero precision in the payload, I was unable to entirely meet this specific requirement. The trade-off I chose was to add an optional `precision` query parameter to the subtree API endpoint to allow clients to specify whether they want to receive JSON floating-point decimal values without precision preservation, or string-formatted decimal values with the original precision preserved in the response payload.

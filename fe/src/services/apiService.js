@@ -3,9 +3,7 @@
 const BASE_URL = process.env.REACT_APP_API_URL || "http://json-server:3001";
 
 /**
- * Fetch tree data from the API.
- * @param {string} path - The endpoint path (e.g., 'Rocket' or 'Rocket/Stage1').
- * @returns {Promise<Object>} - The data returned from the API.
+ * Fetch tree data from the modked API.
  */
 export const fetchTreeData = async (path = "") => {
   try {

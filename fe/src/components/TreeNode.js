@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types'
 
 import DeleteButton from './DeleteButton';
 import Property from './Property'
