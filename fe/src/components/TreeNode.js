@@ -27,7 +27,10 @@ const TreeNode = ({ node, depth, onDelete }) => {
         {/* Render time since created and delete button in same row */}
         <div className='p-2 d-flex flex-row justify-content-between'>
           <TimeSince timestamp={node.created_at} />
-          <DeleteButton onDelete={() => onDelete(node.id) } name={node.name} />
+          <DeleteButton onDelete={() => {
+            setIsCollapsed(true); // Collapse for now until delete is implemented
+            onDelete(node.id)
+          } } name={node.name} />
         </div>
 
         {/* Render properties if any */}
