@@ -23,17 +23,19 @@ const TreeNode = ({ node, depth, onDelete }) => {
         {isCollapsed ? '▶' : '▼'} {node.name}
       </div>
 
+      {!isCollapsed && <div className='mb-3'>
+        {/* Render time since created and delete button in same row */}
+        <div className='p-2 d-flex flex-row justify-content-between'>
+          <TimeSince timestamp={node.created_at} />
+          <DeleteButton onDelete={() => onDelete(node.id)} />
+        </div>
 
-      {!isCollapsed && <div className='ml-4 p-2 d-flex flex-row justify-content-between'>
-        <TimeSince timestamp={node.created_at} />
-        <DeleteButton onDelete={() => onDelete(node.id)} />
-      </div>}
-
-      {/* Render properties if any */}
-      {!isCollapsed && <div className='ml-4 p-2'>
-        {Object.entries(node.properties).map(([key, value]) => (
-          <Property key={key} propKey={key} propValue={value} />
-        ))}
+        {/* Render properties if any */}
+        <div className='p-2 border rounded-3 border-bottom-0 border-top-0'>
+          {Object.entries(node.properties).map(([key, value]) => (
+            <Property key={key} propKey={key} propValue={value} />
+          ))}
+        </div>
       </div>}
 
       {/* Render descendants */}
