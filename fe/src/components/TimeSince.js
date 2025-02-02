@@ -18,6 +18,12 @@ const TimeSince = ({ timestamp }) => {
   )
 };
 
+/**
+ * Helper method to calculate time delta between a given timestamp and now and generate
+ * a human-readable string for that calculation.
+ * @param {String} createdAt Timestamp
+ * @returns String representation of time since created
+ */
 const getTimeSince = (createdAt) => {
   const createdDate = new Date(createdAt);
   const now = new Date();
