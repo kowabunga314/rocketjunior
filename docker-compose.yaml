@@ -34,10 +34,36 @@ services:
       - ./be:/app
     depends_on:
       - db
+      - redis
   migrations:
     <<: *api_base
     restart: 'no'
     command: python manage.py migrate
     ports: []
+  fe: &fe_base
+    build:
+      context: ./fe
+      dockerfile: ./Dockerfile
+    restart: always
+    working_dir: /app
+    command: yarn start
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+      - api
+    volumes:
+      - ./fe:/app # Sync local files with Docker container
+      - /app/node_modules # Prevents node_modules from syncing with local machine
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Ensures hot reload works inside Docker
+      - REACT_APP_API_URL=http://localhost:3001
+    stdin_open: true
+    tty: true
+  json-server:
+    <<: *fe_base
+    command: ["npx", "json-server", "--watch", "/app/src/mocks/db.json", "--host", "0.0.0.0", "--port", "3001"]
+    ports:
+      - "3001:3001"
 volumes:
   pgdata:
