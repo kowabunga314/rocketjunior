@@ -11,3 +11,27 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Light mode */
+.light-mode {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Dark mode */
+.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+  min-height: 100vh;
+}
+
+/* Additional adjustments for Bootstrap components if needed */
+.dark-mode .text-muted {
+  color: #aaaaaa !important;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}

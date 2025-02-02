@@ -26,6 +26,8 @@ To show all API endpoints in Swagger including the model extension endpoints, se
 
 Run tests with ```make test```
 
+Run frontend tests with ```docker compose exec -e REACT_APP_API_URL=http://json-server:3001 fe yarn test ```
+
 ### Troubleshooting
 * Make sure that Docker is installed properly on the local machine
 * Check for other running containers that might be using the same ports

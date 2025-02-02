@@ -5,8 +5,11 @@ import DeleteButton from './DeleteButton';
 import Property from './Property'
 import TimeSince from './TimeSince'
 
+// Set depth after which we automatically collapse nodes
+const autoCollapseDepth = 5;
+
 const TreeNode = ({ node, depth, onDelete }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(depth >= autoCollapseDepth);
 
   const toggleCollapse = () => { setIsCollapsed(!isCollapsed); }
 
@@ -21,17 +24,17 @@ const TreeNode = ({ node, depth, onDelete }) => {
       </div>
 
 
-      <div className='ml-4 p-2 d-flex flex-row justify-content-between'>
+      {!isCollapsed && <div className='ml-4 p-2 d-flex flex-row justify-content-between'>
         <TimeSince timestamp={node.created_at} />
         <DeleteButton onDelete={() => onDelete(node.id)} />
-      </div>
+      </div>}
 
       {/* Render properties if any */}
-      <div className='ml-4 p-2'>
+      {!isCollapsed && <div className='ml-4 p-2'>
         {Object.entries(node.properties).map(([key, value]) => (
           <Property key={key} propKey={key} propValue={value} />
         ))}
-      </div>
+      </div>}
 
       {/* Render descendants */}
       {!isCollapsed && node.descendants && node.descendants.length > 0 && (

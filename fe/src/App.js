@@ -1,76 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import ThemeToggle from './components/ThemeToggle';
 import Tree from './components/Tree';
 
-// Example data
-const sampleData = [
-  {
-    id: 1,
-    name: 'Rocket',
-    path: '/Rocket',
-    created_at: '2025-01-25T23:59:01.131855Z',
-    properties: { Mass: '12000.000', Height: '18.000' },
-    descendants: [
-      {
-        id: 2,
-        name: 'Stage1',
-        path: '/Rocket/Stage1',
-        created_at: '2025-01-25T23:59:01.131855Z',
-        properties: {},
-        descendants: [
-          {
-            id: 4,
-            name: 'Engine1',
-            path: '/Rocket/Stage1/Engine1',
-            created_at: '2025-01-31T23:59:01.131855Z',
-            properties: { ISP: '12.156', Thrust: '9.493' },
-            descendants: []
-          },
-          {
-            id: 5,
-            name: 'Engine2',
-            path: '/Rocket/Stage1/Engine2',
-            created_at: '2025-02-01T19:59:01.131855Z',
-            properties: { ISP: '11.632', Thrust: '9.413' },
-            descendants: []
-          },
-          {
-            id: 6,
-            name: 'Engine3',
-            path: '/Rocket/Stage1/Engine3',
-            created_at: '2025-01-30T23:59:01.131855Z',
-            properties: { ISP: '12.551', Thrust: '9.899' },
-            descendants: []
-          }
-        ],
-      },
-      {
-        id: 7,
-        name: 'Stage2',
-        path: '/Rocket/Stage2',
-        created_at: '2000-01-25T23:59:01.131855Z',
-        properties: {},
-        descendants: [
-          {
-            id: 8,
-            name: 'Engine1',
-            path: '/Rocket/Stage2/Engine1',
-            created_at: '2022-01-25T23:59:01.131855Z',
-            properties: { ISP: '15.110', Thrust: '1.622' },
-            descendants: []
-          }
-        ]
-      }
-    ]
-  }
-];
-
 function App() {
+  const [isDark, setIsDark] = useState(false);
+
+  const toggleDarkMode = () => setIsDark(!isDark);
+
   return (
-    <div className='App'>
-      <h1>Tree Visualization</h1>
-      <Tree data={sampleData} />
+    <div className={`App p-5 mh-100 ${ isDark ? 'dark-mode' : 'light-mode' }`}>
+      <h1>Rocket Junior</h1>
+      <ThemeToggle isDark={isDark} toggleTheme={toggleDarkMode} />
+      <Tree />
     </div>
   );
 }

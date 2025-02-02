@@ -40,7 +40,7 @@ services:
     restart: 'no'
     command: python manage.py migrate
     ports: []
-  fe:
+  fe: &fe_base
     build:
       context: ./fe
       dockerfile: ./Dockerfile
@@ -54,10 +54,16 @@ services:
       - api
     volumes:
       - ./fe:/app # Sync local files with Docker container
-      - /app/node_modules # Prevents node_modules from syncing with your local machine
+      - /app/node_modules # Prevents node_modules from syncing with local machine
     environment:
       - CHOKIDAR_USEPOLLING=true  # Ensures hot reload works inside Docker
+      - REACT_APP_API_URL=http://localhost:3001
     stdin_open: true
     tty: true
+  json-server:
+    <<: *fe_base
+    command: ["npx", "json-server", "--watch", "/app/src/mocks/db.json", "--host", "0.0.0.0", "--port", "3001"]
+    ports:
+      - "3001:3001"
 volumes:
   pgdata:
