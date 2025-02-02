@@ -3,7 +3,7 @@ import Switch from 'react-switch';
 
 const ThemeToggle = ({ isDark, toggleTheme }) => {
   return (
-    <div className='theme-toggle'>
+    <div className='theme-toggle d-flex flex-column'>
       <Switch 
         onChange={toggleTheme} 
         checked={isDark}
@@ -17,6 +17,9 @@ const ThemeToggle = ({ isDark, toggleTheme }) => {
         height={20}
         width={48}
       />
+      <label className='theme-toggle-label'>
+        { isDark ? 'Dark' : 'Light' } Mode
+      </label>
     </div>
   );
 };

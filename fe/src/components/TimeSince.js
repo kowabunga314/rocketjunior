@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const TimeSince = ({ timestamp }) => {
   return (
@@ -9,6 +9,7 @@ const TimeSince = ({ timestamp }) => {
 const getTimeSince = (createdAt) => {
   const createdDate = new Date(createdAt);
   const now = new Date();
+  // Get timedelta between createdAt and now
   const diffInSeconds = Math.floor((now - createdDate) / 1000);
 
   if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;

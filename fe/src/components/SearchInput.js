@@ -1,20 +1,19 @@
-// src/SearchInput.js
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { fetchTreeData } from '../services/apiService';
 const SearchInput = ({ onResults }) => {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [requestStatus, setRequestStatus] = useState('warning');
+  const [requestStatus, setRequestStatus] = useState('danger');
 
   // Debounced function that calls the API service
   const debouncedSearch = _.debounce(async (searchTerm) => {
     try {
       const data = await fetchTreeData(searchTerm || "");
       if (data !== null) {
-        setRequestStatus('info');
+        setRequestStatus('success');
       } else {
-        setRequestStatus('warning');
+        setRequestStatus('danger');
       }
       setIsLoading(false);
       onResults(data);
