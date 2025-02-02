@@ -1,7 +1,7 @@
 // Tests written with Jest & React Testing Library
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Tree from './components/Tree'; // Assuming Tree is the main component
+import Tree from '../components/Tree';
 
 const mockData = [
   {
