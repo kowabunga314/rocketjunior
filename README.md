@@ -170,6 +170,7 @@ CI/CD is critical to the success of an enterprise-level application, speeding up
 
 ## Authentication
 This project retains the default Basic Auth configuration that all new Django projects start with. I would like to have removed this functionality from the project, knowing that it will only ever run as a demo on personal devices with no sensitive information being stored within it. I made the decision to leave authentication in place because part of this project is to explore how an application like this would be deployed to a production environment. If this application needed to be prepared for release, I would get to work on replacing Basic Auth with JWTs for a more secure application that is prepared to support more advanced authentication schemes like OAuth.
+I chose not to build any authentication into the frontend of the application. I felt that since I did not have as much React experience as I have Python experience, it was not worth adding this feature. My time was better spent focusing on the core requirements of the project and making sure that I could produce a clean and polished application.
 
 # Assumptions & Deviations
 * Assumption: Given the information I have, this project could be used in write-heavy applicaitons like hardware design or in read-heavy applications like analytics. For this reason, I have chosen to balance read and write efficiency.
