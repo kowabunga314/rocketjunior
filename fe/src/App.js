@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import Signature from './components/Signature';
 import ThemeToggle from './components/ThemeToggle';
 import Tree from './components/Tree';
 
@@ -24,6 +25,7 @@ function App() {
       <main className='app-main'>
         <Tree />
       </main>
+      <Signature />
     </div>
   );
 }
