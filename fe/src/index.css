@@ -30,6 +30,10 @@ code {
   color: #aaaaaa !important;
 }
 
+.dark-mode .spinner-border {
+  color: #000000;
+}
+
 .theme-toggle {
   position: absolute;
   top: 20px;

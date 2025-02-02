@@ -16,7 +16,6 @@ export const fetchTreeData = async (path = "") => {
     if (!response.ok) {
       // Try with parent path if current path does not work
       const parentPath = trimmedPath.substring(0, trimmedPath.lastIndexOf('/'));
-      console.log('parentPath: ', !!parentPath);
       if (parentPath) {
         data = await fetchTreeData(parentPath);
       } else {
