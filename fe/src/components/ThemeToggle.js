@@ -1,10 +1,23 @@
 import React from 'react';
+import Switch from 'react-switch';
 
 const ThemeToggle = ({ isDark, toggleTheme }) => {
   return (
-    <button className="btn btn-secondary mb-3 theme-toggle" onClick={toggleTheme}>
-      {isDark ? "Switch to Light Mode" : "Switch to DarkMode" }
-    </button>
+    <div className='theme-toggle'>
+      <Switch 
+        onChange={toggleTheme} 
+        checked={isDark}
+        onColor="#333333"
+        onHandleColor="#000000"
+        handleDiameter={30}
+        uncheckedIcon={false}
+        checkedIcon={false}
+        boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+        activeBoxShadow="0px 0px 1px 10px rgba(100, 100, 100, 0.2)"
+        height={20}
+        width={48}
+      />
+    </div>
   );
 };
 
