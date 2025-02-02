@@ -39,3 +39,7 @@ code {
   top: 20px;
   right: 20px;
 }
+
+.important-indent {
+  margin-left: 15px !important;
+}

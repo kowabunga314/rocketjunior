@@ -20,18 +20,18 @@ const TreeNode = ({ node, depth, onDelete }) => {
         style={{ cursor: 'pointer', fontWeight: 'bold' }}
         className='d-flex justify-content-start align-items-center font-weight-bold'
       >
-        {isCollapsed ? '▶' : '▼'} {node.name}
+        <h5>{isCollapsed ? '▶' : '▼'} {node.name}</h5>
       </div>
 
-      {!isCollapsed && <div className='mb-3'>
+      {!isCollapsed && <div className='mb-3 important-indent'>
         {/* Render time since created and delete button in same row */}
         <div className='p-2 d-flex flex-row justify-content-between'>
           <TimeSince timestamp={node.created_at} />
-          <DeleteButton onDelete={() => onDelete(node.id)} />
+          <DeleteButton onDelete={() => onDelete(node.id) } name={node.name} />
         </div>
 
         {/* Render properties if any */}
-        <div className='p-2 border rounded-3 border-bottom-0 border-top-0'>
+        <div className='p-2'>
           {Object.entries(node.properties).map(([key, value]) => (
             <Property key={key} propKey={key} propValue={value} />
           ))}
