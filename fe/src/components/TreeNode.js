@@ -14,7 +14,7 @@ const TreeNode = ({ node, depth, onDelete }) => {
   const toggleCollapse = () => { setIsCollapsed(!isCollapsed); }
 
   return (
-    <div style={{ marginLeft: depth * 20 + 'px' }} className="mb-2 border-top">
+    <div style={{ marginLeft: depth * 20 + 'px' }} className="mb-2 pt-2 border-top">
       <div 
         onClick={toggleCollapse}
         style={{ cursor: 'pointer', fontWeight: 'bold' }}
@@ -23,7 +23,7 @@ const TreeNode = ({ node, depth, onDelete }) => {
         <h5>{isCollapsed ? '▶' : '▼'} {node.name}</h5>
       </div>
 
-      {!isCollapsed && <div className='mb-3 important-indent'>
+      {!isCollapsed && <div className='mb-3 pb-2 important-indent'>
         {/* Render time since created and delete button in same row */}
         <div className='p-2 d-flex flex-row justify-content-between'>
           <TimeSince timestamp={node.created_at} />
@@ -31,11 +31,11 @@ const TreeNode = ({ node, depth, onDelete }) => {
         </div>
 
         {/* Render properties if any */}
-        <div className='p-2'>
+        {Object.keys(node.properties).length > 0 && <div className='p-2'>
           {Object.entries(node.properties).map(([key, value]) => (
             <Property key={key} propKey={key} propValue={value} />
           ))}
-        </div>
+        </div>}
       </div>}
 
       {/* Render descendants */}

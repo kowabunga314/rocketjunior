@@ -19,9 +19,13 @@ const Tree = () => {
   }
 
   return (
-    <div className='mt-4'>
-      <SearchInput onResults={handleSetTreeData} />
-      {treeNode}
+    <div className='mt-4 tree-container'>
+      <div className='tree-search'>
+        <SearchInput onResults={handleSetTreeData} />
+      </div>
+      <div className='tree-node-container'>
+        {treeNode}
+      </div>
     </div>
   );
 };

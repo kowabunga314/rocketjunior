@@ -16,10 +16,14 @@ function App() {
   const toggleDarkMode = () => setIsDark(!isDark);
 
   return (
-    <div className={`App p-5 mh-100 ${ isDark ? 'dark-mode' : 'light-mode' }`}>
-      <h1>Rocket Junior</h1>
-      <ThemeToggle isDark={isDark} toggleTheme={toggleDarkMode} />
-      <Tree />
+    <div className={`App app-container ${ isDark ? 'dark-mode' : 'light-mode' }`}>
+      <header className='app-header'>
+        <h1>Rocket Junior</h1>
+        <ThemeToggle isDark={isDark} toggleTheme={toggleDarkMode} />
+      </header>
+      <main className='app-main'>
+        <Tree />
+      </main>
     </div>
   );
 }
