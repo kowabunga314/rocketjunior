@@ -87,8 +87,8 @@ code {
 }
 
 .dark-mode input {
-  color: #333 !important;
-  background-color: #eee !important;
+  color: #eee !important;
+  background-color: #444 !important;
 }
 
 input:focus {
