@@ -86,11 +86,6 @@ code {
   text-decoration: underline;
 }
 
-.dark-mode input {
-  color: #eee !important;
-  background-color: #444 !important;
-}
-
 input:focus {
   outline: none !important;
   box-shadow: none !important;
@@ -132,4 +127,13 @@ input:focus {
 .dark-mode .app-header {
   background-color: #141414;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode input {
+  color: #eee !important;
+  background-color: #444 !important;
+}
+
+.dark-mode input::placeholder {
+  color: #ddd !important;
 }
