@@ -11,7 +11,7 @@ const SearchInput = ({ onResults }) => {
     try {
       const data = await fetchTreeData(searchTerm || "");
       if (data !== null) {
-        setRequestStatus('success');
+        setRequestStatus('secondary');
       } else {
         setRequestStatus('danger');
       }
